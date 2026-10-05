@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "MEND: RL for Flow Models via Proximal Velocity Matching"
+type: software
+authors:
+  - family-names: Saini
+    given-names: Shreshth
+    email: saini.2@utexas.edu
+    affiliation: "The University of Texas at Austin; Google"
+  - family-names: Birkbeck
+    given-names: Neil
+    affiliation: "Google"
+  - family-names: Wang
+    given-names: Yilin
+    affiliation: "Google"
+  - family-names: Adsumilli
+    given-names: Balu
+    affiliation: "Google"
+  - family-names: Bovik
+    given-names: Alan C.
+    affiliation: "The University of Texas at Austin; University of Colorado Boulder"
+repository-code: "https://github.com/shreshthsaini/MEND-RL"
+url: "https://shreshthsaini.github.io/MEND-RL/"
+license: Apache-2.0
+preferred-citation:
+  type: article
+  title: "MEND: RL for Flow Models via Proximal Velocity Matching"
+  authors:
+    - family-names: Saini
+      given-names: Shreshth
+    - family-names: Birkbeck
+      given-names: Neil
+    - family-names: Wang
+      given-names: Yilin
+    - family-names: Adsumilli
+      given-names: Balu
+    - family-names: Bovik
+      given-names: Alan C.
+  journal: "arXiv preprint"
+  year: 2026
+  url: "https://shreshthsaini.github.io/MEND-RL/paper/mend_arxiv.pdf"

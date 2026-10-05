@@ -1,0 +1,33 @@
+# MEND paper showcase prompts (scripts/gen_hires.py --prompts data/showcase_prompts.tsv; figures scripts/showcase_figs.py).
+# Format: prompt_id <TAB> source <TAB> tag <TAB> aspect <TAB> prompt. Seeds 0,1,2,3 for every method; the initial latent
+# of (prompt_id, seed) is eval_suite.initial_latent(seed, sha1(prompt_id)), identical across methods at a given
+# resolution, so a row of a figure starts from the same noise. All renders are square at native 512 or 1024 px.
+# Sources: drawbench = verbatim DrawBench; parti = verbatim or near-verbatim PartiPrompts; geneval = GenEval template;
+# custom = written for this figure set (long = long descriptive prompt). Tags: people, animal, text, count, compose,
+# scene, style, hard (prompts that are hard for SD3.5-M in general; no per-example failure figure is made).
+fisherman	custom	people	1:1	Close-up studio portrait of an elderly fisherman with a weathered face, salt-and-pepper beard and a knitted wool cap, soft window light, shallow depth of field, 85mm photograph
+redhead_wheat	custom	people	1:1	Portrait of a young woman with freckles and curly red hair laughing in golden-hour light in a wheat field, candid film photograph.
+grandma_dough	custom	people,long	1:1	A candid documentary photograph of a grandmother and her granddaughter rolling out dough together at a flour-dusted kitchen table, morning sunlight streaming through lace curtains, the grandmother's wrinkled hands covered in flour, the little girl laughing with a smudge of flour on her nose, shallow depth of field, warm film tones.
+fox_snow	custom	animal	1:1	A red fox curled up asleep in fresh snow, frost on its fur, soft blue morning light, wildlife photography.
+owl_flight	custom	animal	1:1	A snowy owl in flight with wings fully spread against a dark forest background, every feather sharply detailed.
+puppy_raincoat	parti	animal	1:1	A golden retriever puppy wearing a tiny yellow raincoat, splashing in a puddle, photo.
+panda_latte	drawbench	animal	1:1	A panda making latte art.
+corgi_bike	parti	animal,compose	1:1	A photo of a Corgi dog riding a bike in Times Square. It is wearing sunglasses and a beach hat.
+neon_diner	custom	text	1:1	A vintage neon sign that reads "OPEN ALL NIGHT" glowing above a rainy diner window at midnight, reflections on the wet street.
+storefront_dl	drawbench	text	1:1	A storefront with 'Deep Learning' written on it.
+poster_lighthouse	custom	text	1:1	A movie poster titled "THE LAST LIGHTHOUSE" showing a lone lighthouse on a cliff during a storm, dramatic lightning, bold serif title text.
+chalkboard_cafe	custom	text	1:1	A hand-lettered chalkboard menu outside a cafe reading "Fresh Coffee", with a potted plant and morning sun.
+four_apples	geneval	count	1:1	A photo of four apples on a white plate.
+five_cars	drawbench	count,hard	1:1	Five cars on the street.
+car_bicycle	drawbench	compose	1:1	A red colored car next to a blue colored bicycle.
+laptop_teddy	geneval	compose	1:1	A laptop on top of a teddy bear.
+drier_sheep	drawbench	compose,hard	1:1	A hair drier underneath a sheep.
+astronaut_horse	parti	compose	1:1	An astronaut riding a horse on the surface of the moon, Earth rising in the background.
+night_market	custom	scene	1:1	A bustling night market in Taipei with lanterns, food stalls, steam rising from dumplings and crowds of people, cinematic wide shot.
+alpine_lake	custom	scene	1:1	A misty alpine lake at sunrise surrounded by pine forest and snow-capped peaks, perfectly still water reflecting the mountains.
+library_dusk	custom	scene,long	1:1	Inside a vast Victorian library at dusk: spiral cast-iron staircases, towering oak shelves packed with leather-bound books, a brass telescope beside an arched window, dust motes floating in amber lamplight, and a tabby cat asleep on a green reading desk, ultra-detailed architectural photograph.
+raccoon_vangogh	parti	style	1:1	A raccoon wearing formal clothes, wearing a tophat and holding a cane. The raccoon is holding a garbage bag. Oil painting in the style of Vincent Van Gogh.
+stained_glass	parti	style	1:1	A stained glass window depicting a hummingbird drinking from a flower, vivid colors, sunlight shining through.
+iso_bakery	custom	style	1:1	An isometric 3D render of a tiny cozy bakery with warm lights, pastel colors, clay material, soft shadows.
+ghibli_busstop	custom	style,long	1:1	A hand-painted anime film still of a small girl in a yellow raincoat and a giant furry forest spirit waiting side by side at a rural bus stop in the rain at dusk, glowing lantern, puddles, lush green hills, soft watercolor clouds.
+piano_hands	custom	hard	1:1	A person's hands playing a piano, close-up, all ten fingers clearly visible on the keys.

@@ -1,0 +1,56 @@
+# MEND qualitative-comparison prompt set: 48 prompts x 8 seeds, chosen to expose mode collapse and detail loss
+# (varied subjects, multi-object and counting, textures and materials, rendered text, portraits).
+# Format: prompt_id <TAB> source <TAB> tag <TAB> prompt. Lines starting with '#' are comments.
+# Sources (prompts copied verbatim, including original typos):
+#   db = DrawBench (Saharia et al., 2022), from data/drawbench/test.txt (the OPSD evaluation manifest).
+#   pa = PartiPrompts (Yu et al., 2022), github.com/google-research/parti PartiPrompts.tsv.
+#   pk = Pick-a-Pic v1 test_unique split (Kirstain et al., 2023), HF dataset pickapic-anonymous/pickapic_v1.
+# Selection was by hand for category coverage, before any image was generated; tags are ours.
+db01	DrawBench	multi-object	One cat and one dog sitting on the grass.
+db02	DrawBench	attribute-binding	A blue cup and a green cell phone.
+db03	DrawBench	text	A storefront with 'Hello World' written on it.
+db04	DrawBench	text	New York Skyline with 'Google Research Pizza Cafe' written with fireworks on the sky.
+db05	DrawBench	texture	A baby fennec sneezing onto a strawberry, detailed, macro, studio light, droplets, backlit ears.
+db06	DrawBench	detail	A realistic photo of a Pomeranian dressed up like a 1980s professional wrestler with neon green and neon orange face paint and bright green wrestling tights with bright orange boots.
+db07	DrawBench	counting	Three cats and two dogs sitting on the grass.
+db08	DrawBench	positional	An illustration of a small green elephant standing behind a large red mouse.
+db09	DrawBench	texture	A cube made of brick. A cube with the texture of brick.
+db10	DrawBench	detail	A magnifying glass over a page of a 1950s batman comic.
+db11	DrawBench	subject	A photo of a confused grizzly bear in calculus class.
+db12	DrawBench	multi-person	An oil painting of a couple in formal evening wear going home get caught in a heavy downpour with no umbrellas.
+db13	DrawBench	portrait-scene	In late afternoon in January in New England, a man stands in the shadow of a maple tree.
+db14	DrawBench	positional	A bicycle on top of a boat.
+db15	DrawBench	perspective	A fisheye lens view of a turtle sitting in a forest.
+db16	DrawBench	text-ui	A screenshot of an iOS app for ordering different types of milk.
+pa01	PartiPrompts	detail	A punk rock squirrel in a studded leather jacket shouting into a microphone while standing on a stump
+pa02	PartiPrompts	detail	a high-quality photograph of an armadillo playing a bagpipe while standing on one leg
+pa03	PartiPrompts	detail	fairy cottage with smoke coming up chimney and a squirrel looking from the window
+pa04	PartiPrompts	text	high-contrast image of the word "WOMBAT" written with thick colored graffiti letters on a white wall with dramatic splashes of paint
+pa05	PartiPrompts	text	The saying "BE EXCELLENT TO EACH OTHER" written in a stained glass window.
+pa06	PartiPrompts	text	a book with the words 'Don't Panic!' written on it
+pa07	PartiPrompts	counting	four owls standing on a telephone wire
+pa08	PartiPrompts	counting	two red flowers and three white flowers
+pa09	PartiPrompts	multi-person	a family of four walking at the beach with waves covering their feet
+pa10	PartiPrompts	style	A raccoon wearing formal clothes, wearing a tophat and holding a cane. The raccoon is holding a garbage bag. Oil painting in the style of Rembrandt.
+pa11	PartiPrompts	multi-object	a blue cow is standing next to a tree with red leaves and yellow fruit. the cow is standing in a field with white flowers. impressionistic painting.
+pa12	PartiPrompts	texture	Downtown Austin at sunrise. detailed ink wash.
+pa13	PartiPrompts	portrait	close-up portrait of a smiling businesswoman holding a cell phone, oil painting in the style of Rembrandt
+pa14	PartiPrompts	texture	a close-up of the eyes of an owl
+pa15	PartiPrompts	texture	a close-up of the keys of a piano
+pa16	PartiPrompts	material	A photo of a teddy bear made of water.
+pk01	Pick-a-Pic	texture	A close-up photograph of a fat orange cat with lasagna in its mouth. Shot on Leica M6.
+pk02	Pick-a-Pic	material	cinematic still of highly reflective stainless steel train in the desert, at sunset
+pk03	Pick-a-Pic	detail	a closeup photo of a human hand
+pk04	Pick-a-Pic	texture	woodcut print giant octopus attacks pirate ship, ultra detailed
+pk05	Pick-a-Pic	style	watercolour painting of an orange cat
+pk06	Pick-a-Pic	portrait	A portrait of a bear wearing a suit in the style of a Baroque painting
+pk07	Pick-a-Pic	portrait	full length portrait of a beautiful woman
+pk08	Pick-a-Pic	subject	A brindle French Bulldog sleeping in front of a gas fireplace
+pk09	Pick-a-Pic	material	a close up of a watermelon shaped, egg style chair, with watermelon characteristics, a 3D render
+pk10	Pick-a-Pic	text	birthday card with the exact text "happy birthday user"
+pk11	Pick-a-Pic	text	a car with the text "red" written on it
+pk12	Pick-a-Pic	portrait	b&w photo of 42 y.o man in black clothes, bald, face, half body, body, high detailed skin, skin pores, coastline, overcast weather
+pk13	Pick-a-Pic	scene	a landscape with a river running down the middle in a forest with a sunset behind distant mountains
+pk14	Pick-a-Pic	portrait	a portrait of a clown by Trent Parke
+pk15	Pick-a-Pic	multi-person	a couple dancing lindy hop at street
+pk16	Pick-a-Pic	subject	An little humanlike robot out of scrap

@@ -1,0 +1,44 @@
+# MEND hi-res showcase prompts (scripts/gen_hires.py). Format: prompt_id <TAB> source <TAB> tag <TAB> aspect <TAB> prompt.
+# Sources: custom = written for this figure set; drawbench / parti / geneval = in the style of (or verbatim from) those
+# benchmarks; opsd_fig11 = held-out prompts shown in DiffusionOPSD Fig. 11 (text token 'DiffusionOPSD' replaced by 'MEND');
+# selfopd_* = Self-OPD README / Fig. 1 showcase prompts. aspect is used only with gen_hires.py --aspect native.
+p01	custom	portrait	3:4	Close-up studio portrait of an elderly fisherman with a weathered face, salt-and-pepper beard and a knitted wool cap, soft window light, shallow depth of field, 85mm photograph.
+p02	custom	portrait	3:4	Portrait of a young woman with freckles and curly red hair laughing in golden-hour light in a wheat field, candid film photograph.
+p03	custom	portrait	1:1	A chef in a white uniform plating a dessert in a busy restaurant kitchen, steam and warm tungsten lights, documentary photo.
+t01	custom	text	16:9	A vintage neon sign that reads "OPEN ALL NIGHT" glowing above a rainy diner window at midnight, reflections on the wet street.
+t02	selfopd_ocr	text	1:1	A storefront with 'Google Brain Toronto' written on it.
+t03	custom	text	3:4	A hand-lettered chalkboard menu outside a cafe reading "Fresh Coffee 3 dollars", with a potted plant and morning sun.
+t04	opsd_fig11	text	1:1	Geology cross-section poster of Earth layers, including crust, mantle, outer and inner core, with detailed depths, temperatures and labels.
+t05	custom	text	16:9	A movie poster titled "THE LAST LIGHTHOUSE" showing a lone lighthouse on a cliff during a storm, dramatic lightning, bold serif title text.
+t06	opsd_fig11	text	1:1	Liquid-mercury 3D letters of MEND, placed on a dark reflective stage with volumetric spotlights and crisp product-render detail.
+s01	custom	scene	16:9	A bustling night market in Taipei with lanterns, food stalls, steam rising from dumplings and crowds of people, cinematic wide shot.
+s02	opsd_fig11	scene	16:9	Floodlit stadium football moment: striker mid bicycle-kick, roaring crowd, flags, turf spray, sweat droplets in the background, and motion blur effect.
+s03	custom	scene	16:9	A misty alpine lake at sunrise surrounded by pine forest and snow-capped peaks, perfectly still water reflecting the mountains.
+s04	custom	scene	1:1	A cozy reading nook by a rain-streaked window with a knitted blanket, a steaming mug of tea and a stack of old books, warm lamp light.
+s05	parti	scene	16:9	A futuristic city skyline at dusk with flying cars and holographic billboards, highly detailed digital art.
+s06	custom	scene	9:16	A narrow cobblestone alley in an Italian village with laundry lines, flower boxes and a cat sitting on a doorstep, afternoon light.
+a01	custom	animal	1:1	A red fox curled up asleep in fresh snow, frost on its fur, soft blue morning light, wildlife photography.
+a02	parti	animal	1:1	A golden retriever puppy wearing a tiny yellow raincoat, splashing in a puddle, photo.
+a03	custom	animal	3:4	A snowy owl in flight with wings fully spread against a dark forest background, every feather sharply detailed.
+a04	drawbench	animal	1:1	A panda making latte art.
+a05	custom	animal	16:9	A herd of elephants crossing a dusty savanna river at sunset, backlit dust, telephoto shot.
+o01	custom	object	1:1	A luxury mechanical wristwatch with a skeleton dial showing gears and jewels, macro product photograph on black slate.
+o02	opsd_fig11	object	1:1	High-speed macro of a water-droplet crown frozen mid-splash on a colorful surface, elegant and detailed.
+o03	custom	object	1:1	A glass teapot with blooming jasmine tea on a wooden table, soft backlight, steam, and refracted light.
+o04	opsd_fig11	object	3:4	Stacked wooden animal totem with bear at the bottom, eagle in the middle and fish on top, with weathered paint, forest bokeh and warm light.
+c01	selfopd_geneval	composition	1:1	A laptop on top of a teddy bear.
+c02	selfopd_geneval	composition	1:1	A photo of a vase right of a horse.
+c03	drawbench	composition	1:1	A red colored car next to a blue colored bicycle.
+c04	geneval	counting	1:1	A photo of four apples on a white plate.
+c05	drawbench	composition	1:1	A blue coloured pizza.
+c06	parti	composition	1:1	An astronaut riding a horse on the surface of the moon, Earth rising in the background.
+y01	custom	style	1:1	A watercolor painting of a lighthouse on a rocky coast with crashing waves and seagulls, loose brush strokes.
+y02	custom	style	16:9	A Studio Ghibli style illustration of a small girl and a giant forest spirit waiting at a rural bus stop in the rain.
+y03	parti	style	1:1	A Van Gogh style oil painting of a cat sitting on a windowsill at night with swirling stars outside.
+y04	custom	style	1:1	An isometric 3D render of a tiny cozy bakery with warm lights, pastel colors, clay material, soft shadows.
+y05	custom	style	3:4	A detailed ink and pencil fantasy map of an island kingdom with mountains, forests, rivers and hand-written place names.
+y06	parti	style	1:1	A stained glass window depicting a hummingbird drinking from a flower, vivid colors, sunlight shining through.
+f01	drawbench	hard	1:1	A hair drier underneath a sheep.
+f02	drawbench	hard	1:1	Five cars on the street.
+f03	custom	hard	1:1	A person's hands playing a piano, close-up, all ten fingers clearly visible on the keys.
+f04	custom	hard	16:9	A 1940s train-station farewell: a couple embraces through steam and sepia backlight, with vintage clothing, cinematic nostalgia, and a station sign reading MEND.

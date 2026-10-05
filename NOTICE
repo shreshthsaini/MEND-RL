@@ -1,0 +1,88 @@
+MEND
+Copyright 2026 Shreshth Saini
+
+This product includes software derived from DiffusionOPSD
+(https://github.com/worldbench/DiffusionOPSD), distributed under
+Apache-2.0. The derived files were moved, renamed and modified by the MEND
+authors. Copyright headers present in the original files, including NVIDIA
+headers, are kept unchanged.
+
+Files derived from DiffusionOPSD, with their origin in that repository:
+
+  MEND trainers (forked; target construction and loss rewritten for MEND)
+    mend/train/sd3.py                      scripts/train_opsd_ri_sd3.py
+    mend/train/zimage.py                   scripts/train_opsd_zimage.py (model handling)
+    scripts/train_mend.sh                  scripts/train_public.sh
+
+  Sampling, rewards and utilities
+    mend/__init__.py                       src/__init__.py
+    mend/sampling/__init__.py              src/diffusers_patch/__init__.py
+    mend/sampling/sd3_logprob.py           src/diffusers_patch/pipeline_with_logprob.py
+    mend/sampling/solver.py                src/diffusers_patch/solver.py
+    mend/sampling/sd3_prompt_encoding.py   src/diffusers_patch/train_dreambooth_lora_sd3.py
+    mend/sampling/zimage_rollout.py        src/diffusers_patch/zimage_pipeline_with_rollout.py
+    mend/rewards/scoring.py                src/rewards.py
+    mend/rewards/*_scorer.py               src/*_scorer.py
+    mend/rewards/ckpt_path.py              src/reward_ckpt_path.py
+    mend/rewards/zimage_bridge.py          src/zimage_reward_bridge.py
+    mend/rewards/zimage_heavy_diff_bridge.py  src/zimage_heavy_diff_bridge.py
+    mend/rewards/zimage_bridge_parity.py   scripts/test_zimage_reward_bridge_parity.py
+    mend/rewards/check_setup.py            scripts/check_reward_setup.py
+    mend/utils/ema.py                      src/ema.py
+    mend/utils/stat_tracking.py            src/stat_tracking.py
+    mend/utils/checkpointing.py            src/experiment_io.py
+    mend/utils/metric_logging.py           src/metrics.py
+    mend/utils/profiling.py                src/profiling.py
+    mend/data/prepare_pickapic.py          scripts/prepare_pickapic_prompts.py
+    mend/eval/cross_eval.py                scripts/cross_eval.py
+    mend/eval/native_eval.py               scripts/native_eval.py
+    mend/eval/diversity.py                 scripts/eval_diversity.py
+    scripts/download_reward_weights.sh     scripts/download_reward_weights.sh
+
+  Configuration presets
+    configs/api.py, base.py, flowgrpo.py, mixed.py, nft.py, opsd_defaults.py,
+    public.py, refl.py, zimage.py          config/<same name>
+
+  Data recipes
+    data/pickapic_recipe.json              data/pickapic_recipe.json
+    data/drawbench/test.txt                data/drawbench/test.txt
+
+  Baselines (comparison methods)
+    baselines/opsd/train_sd3.py            scripts/train_opsd_ri_sd3.py
+    baselines/opsd/train_zimage.py         scripts/train_opsd_zimage.py
+    baselines/opsd/train.sh                scripts/train_public.sh
+    baselines/opsd/smoke_reward_gradient.py  scripts/smoke_reward_gradient.py
+    baselines/flowgrpo/train_sd3.py        scripts/train_flowgrpo_sd3.py
+    baselines/flowgrpo/train_zimage.py     scripts/train_flowgrpo_zimage.py
+    baselines/nft/train_sd3.py             scripts/train_nft_sd3.py
+    baselines/nft/train_zimage.py          scripts/train_nft_zimage.py
+    baselines/refl/common.py               scripts/refl_common.py
+    baselines/refl/train_sd3.py            scripts/train_refl_sd35m.py
+    baselines/refl/train_zimage.py         scripts/train_refl_zimage.py
+    baselines/refl/train.sh                scripts/train_refl.sh
+    baselines/train_flowgrpo_nft.sh        scripts/train_baseline.sh
+    baselines/train_mixed_reward.sh        scripts/train_mixed_reward.sh
+
+The baseline methods originate in the following projects:
+  Flow-GRPO     https://github.com/yifan123/flow_grpo
+  DiffusionNFT  https://github.com/NVlabs/DiffusionNFT
+  ReFL          introduced with ImageReward, https://github.com/zai-org/ImageReward
+  DiffusionOPSD https://github.com/worldbench/DiffusionOPSD
+
+Some of the derived files carry further upstream sources, named in their
+headers and inherited from DiffusionOPSD:
+  mend/sampling/sd3_logprob.py, mend/sampling/sd3_prompt_encoding.py
+      Hugging Face Diffusers, https://github.com/huggingface/diffusers
+      (Apache-2.0; the HuggingFace copyright header is kept)
+  mend/rewards/clip_scorer.py
+      imscore, https://github.com/RE-N-Y/imscore
+  mend/rewards/aesthetic_scorer.py
+      improved-aesthetic-predictor,
+      https://github.com/christophschuhmann/improved-aesthetic-predictor
+
+All other files (the mend.algorithm package, the evaluation suite and analysis
+tools, scripts/generate.py, infra/, configs/mend.py, the guides and the tests)
+are original to MEND.
+
+Base models, reward models and datasets are not redistributed here. They are
+downloaded by the user and remain under their own terms.

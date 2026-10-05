@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Move Must Pay for Its Distance | MEND</title>
+<meta name="description" content="The idea behind MEND: reward fine-tuning of flow models needs a decision for every sample, and a sample should move only when the reward it gains pays for the distance it travels.">
+<meta name="author" content="Shreshth Saini">
+<meta name="theme-color" content="#1e5aaa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A Move Must Pay for Its Distance">
+<meta property="og:description" content="The idea behind MEND: reward fine-tuning of flow models needs a decision for every sample.">
+<meta property="og:url" content="https://shreshthsaini.github.io/MEND-RL/blog.html">
+<meta property="og:image" content="https://shreshthsaini.github.io/MEND-RL/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="post-head wrap">
+  <div class="prose">
+    <a class="back" href="index.html">← MEND project page</a>
+    <h1 class="post-title">A Move Must Pay for Its Distance</h1>
+    <p class="subtitle">Reward fine-tuning of an image model changes every sample a little and asks no sample whether the change was worth it. MEND asks, and trains only on the answers.</p>
+    <p class="meta">Oct 2026 · Shreshth Saini <a href="paper/mend_arxiv.pdf">Paper</a><a href="https://github.com/shreshthsaini/MEND-RL">Code</a><a href="index.html">Project page</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+<article class="post">
+<div class="prose">
+
+  <div class="summary">
+    <p><strong>Thesis.</strong> Reward fine-tuning of flow models is missing a decision. Somebody has to say, for each sample, whether it should change and how far. MEND makes that decision with one rule: a move is accepted only when its reward gain exceeds a price that grows with the square of its length.</p>
+    <p><strong>Main technical point.</strong> The accepted moves become velocity targets, and the model fits them by regression. The loss has no KL term, no frozen reference model and no advantage weights.</p>
+    <p><strong>Practical implication.</strong> On SD3.5-M, 100 updates and 10.0 GPU-hours are enough to pass a Flow-GRPO adapter trained for about 4k updates on five of six evaluators, at the same distance to the base model's images.</p>
+  </div>
+
+  <h2 id="decision">The missing decision</h2>
+  <p>A reward model such as PickScore<sup class="cite"><a href="#ref1">[1]</a></sup> gives an image a number. Fine-tuning a text-to-image model on that number sounds simple, and the field has three ways to do it.</p>
+  <p>Policy-gradient methods such as Flow-GRPO<sup class="cite"><a href="#ref2">[2]</a></sup> sample a group of images per prompt and reweight their trajectories by how far each one sits above the group average, under a KL penalty. Weighted-regression methods such as DiffusionNFT<sup class="cite"><a href="#ref3">[3]</a></sup> reweight the model's own samples inside a regression loss. Both change how much each existing sample counts. Neither says where a weak sample should go. The Flow-GRPO and DiffusionNFT models we compare against use about 4k and 1.7k updates.</p>
+  <p>Reward backpropagation, as in ReFL<sup class="cite"><a href="#ref4">[4]</a></sup> and DRaFT<sup class="cite"><a href="#ref5">[5]</a></sup>, does supply a direction. It differentiates the reward through sampling and follows the gradient. But the gradient moves every sample, including the ones that already score well, and nothing checks that a move earns its size.</p>
+  <p>When I lined the three up, the same gap showed in each. A KL penalty limits how far the distribution drifts as a whole. A frozen reference does the same. None of these terms looks at one sample and decides whether changing it is worth it. That decision is what MEND adds.</p>
+
+  <figure>
+    <img src="assets/toy.png" width="1800" height="792" loading="lazy" alt="A one-dimensional flow with three modes in four panels: the pre-trained flow, reward reweighting, a gradient target, and MEND.">
+    <figcaption>A flow with three modes, one of them hard to reach. Reweighting (b) loses the hard mode. A gradient target (c) moves every seed and pushes some off the data. MEND (d) leaves capped samples alone and makes short moves elsewhere.</figcaption>
+  </figure>
+
+  <p>The toy above shows both failures in one dimension. Reweighting concentrates on the samples that already sit on a peak, and the hard mode starves. Unchecked ascent moves everything, and some of the mass leaves the data.</p>
+
+  <h2 id="principle">A move must pay for its distance</h2>
+  <p>The principle fits in one sentence. A sample should move only when the reward it gains pays for the distance it travels.</p>
+  <p>Two things follow from taking that sentence seriously. First, a sample that already scores well has little to gain, so it should stay where it is. Second, a long move needs a large gain to justify it, and a short move needs only a small one. We write the second point as a quadratic price. For a sample \(x\) and a candidate \(y\), the objective is</p>
+  <div class="eq">\[ J(y)=R_\kappa(y,c)-\frac{\lVert y-x\rVert^{2}}{2\tau}. \]</div>
+  <p>Here \(R_\kappa=\min\{R,\kappa\}\) is the reward capped at \(\kappa\), and \(\tau\) sets the price of distance. This is the proximal-point objective from optimization<sup class="cite"><a href="#ref6">[6]</a></sup>. We do not solve it over all of latent space. We evaluate it on a handful of decoded candidates, and the unchanged sample is always one of them. Staying put costs nothing, so a move has to beat it.</p>
+
+  <h2 id="loop">Cap, propose, verify, regress</h2>
+  <p>One training round has four steps.</p>
+
+  <figure>
+    <img src="assets/method.png" width="1900" height="733" loading="lazy" alt="MEND overview in three panels: roll out and cap, propose and verify, regress onto the accepted displacement.">
+    <figcaption>One round of MEND. The behavior adapter rolls out a group per prompt, the cap keeps the top of the group, each remaining sample gets three proposals and a verdict, and the trained adapter regresses onto the accepted displacement.</figcaption>
+  </figure>
+
+  <p><strong>Cap.</strong> A lagged copy of the model, the behavior adapter, generates a group of images for each prompt. We set the cap \(\kappa\) at the 0.75 quantile of the group's rewards. Samples at or above it get no move, and \(R_\kappa\) gives no credit for going past it.</p>
+  <p><strong>Propose.</strong> Each sample below the cap gets three proposals along its normalized reward gradient \(g\):</p>
+  <div class="eq">\[ y_j=x+\eta_j\,\frac{g}{\lVert g\rVert},\qquad \eta_j\in\{0.1,\,0.2,\,0.4\}. \]</div>
+  <p>Normalizing the gradient makes each step a length, whatever the reward's scale. Every proposal is decoded and scored once. The decision uses the reward the proposal reached. It does not trust the gradient's promise.</p>
+  <p><strong>Verify.</strong> We compute \(J\) for the sample and its three proposals and keep the best. Ties favor staying.</p>
+  <p><strong>Regress.</strong> Let \(d=y^{\star}-x\) be the accepted displacement, or zero if the sample stayed. At a stored state \(z_q\) from the rollout, the trained model matches the behavior model's velocity shifted by that displacement:</p>
+  <div class="eq">\[ t_q^{2}\,\big\lVert v_\theta(z_q,t_q,c)-v^{\star}\big\rVert^{2},\qquad v^{\star}=\operatorname{sg}\big[v_{\mathrm{old}}(z_q,t_q,c)-d/t_q\big]. \]</div>
+  <p>A kept sample asks the model to do what it already does. A moved sample asks for exactly the correction \(d\). That is the whole loss. We call it proximal velocity matching, because it is ordinary velocity matching onto a target that the proximal rule selected. The sampler is never differentiated.</p>
+
+  <h2 id="worked">One sample, worked through</h2>
+  <p>The numbers here are made up to show the arithmetic. Take a group whose cap is \(\kappa=0.86\), a sample with reward \(0.80\), and a price \(\tau=1\). The three steps cost \(\eta^2/2\tau\), which is 0.005, 0.02 and 0.08. Suppose the decoded proposals score 0.83, 0.87 and 0.88.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th scope="col">Candidate</th><th scope="col">Step</th><th scope="col">Reward</th><th scope="col">Capped</th><th scope="col">Price</th><th scope="col">\(J\)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">stay</th><td>0</td><td>0.80</td><td>0.80</td><td>0</td><td>0.800</td></tr>
+        <tr><th scope="row">\(y_1\)</th><td>0.1</td><td>0.83</td><td>0.83</td><td>0.005</td><td>0.825</td></tr>
+        <tr class="ours"><th scope="row">\(y_2\)</th><td>0.2</td><td>0.87</td><td>0.86</td><td>0.02</td><td class="best">0.840</td></tr>
+        <tr><th scope="row">\(y_3\)</th><td>0.4</td><td>0.88</td><td>0.86</td><td>0.08</td><td>0.780</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The verdict picks the middle step. The longest proposal has the highest raw reward and still loses to doing nothing. The cap gives it no credit above 0.86, and it costs four times as much as the middle step. Gradient ascent has no such check. It moves every sample in the batch.</p>
+  <p>The same arithmetic gives a guarantee. Every accepted target satisfies</p>
+  <div class="eq">\[ \frac{\lVert y^{\star}-x\rVert^{2}}{2\tau}\;\le\;R_\kappa(y^{\star})-R_\kappa(x)\;\le\;\kappa-R_\kappa(x), \]</div>
+  <p>so no sample can move farther than \(\sqrt{2\tau(\kappa-R_\kappa(x))}\). In the example that bound is about 0.35, which rules out the 0.4 step before it is scored. As a sample nears the cap its headroom goes to zero, and so does the largest move it can receive. A second result in the paper shows that, at the behavior parameters, the gradient of the regression loss is reward backpropagation restricted to the accepted samples and scaled by their chosen steps. MEND keeps the direction that backpropagation offers and adds the two decisions it lacks, which samples move and how far.</p>
+  <p>The price \(\tau\) is not tuned by hand during a run. It is fixed within a round and adjusted between rounds to target an acceptance rate of 30% to 60% among proposed samples.</p>
+
+  <h2 id="results">What the results show</h2>
+  <p>We train SD3.5-M<sup class="cite"><a href="#ref7">[7]</a></sup> on PickScore under the equal-budget protocol of Zhou et al.<sup class="cite"><a href="#ref8">[8]</a></sup>: 48 prompts with 24 images each per update, a rank-32 LoRA, and 100 updates. ReFL and DiffusionNFT are the baselines under that protocol. Evaluation is DrawBench with 200 prompts and 5 seeds.</p>
+
+  <figure class="narrow">
+    <img src="assets/curve_heldout_pick.png" width="640" height="586" loading="lazy" class="small" alt="Held-out PickScore against updates for MEND, ReFL and DiffusionNFT under the equal-budget protocol, with the Flow-GRPO level as a dashed line.">
+    <figcaption>Held-out PickScore against updates at equal budget. The dashed line is the Flow-GRPO adapter, trained for about 4k updates, at its own setting.</figcaption>
+  </figure>
+
+  <p>At equal budget MEND is ahead of both baselines at every evaluated update. It reaches PickScore 24.03 at update 100, against 23.92 for ReFL and 23.43 for DiffusionNFT. The same holds when the training reward is ImageReward, HPSv2.1 or CLIPScore.</p>
+  <p>Against the Flow-GRPO PickScore adapter, the 100-update MEND run scores higher on five of six evaluators at the same DreamSim distance to the base model's images, 0.313 for both. Flow-GRPO keeps the aesthetic score, 5.90 against 5.88. That is roughly 40 times fewer updates, and the run costs 10.0 GPU-hours on three GB200 GPUs.</p>
+  <p>The ablations show what the cap and the price buy. At a smaller development budget, the full rule accepts moves for 34% of seeds per round. Removing the cap raises that share to 45%, and removing the price raises it to 78%. Moving every seed below the cap gives the highest PickScore, 23.45 against 23.10 for the full rule, and the lowest diversity, 0.260 against 0.297. Restricting moves trades a little reward for diversity, and we take that trade.</p>
+  <p>The method is not specific to SD3.5-M. At the same update budget it raises PickScore on SD3-M from 20.36 to 23.70, and on the distilled Z-Image-Turbo from 22.86 to 24.10.</p>
+
+  <h2 id="limits">Limits</h2>
+  <p>MEND needs a differentiable reward. The proposals come from the reward gradient, so a reward you can only query does not fit as is.</p>
+  <p>The guarantee is per round. It bounds each accepted move against the reward it gained in that round. It says nothing about the sum of a hundred rounds.</p>
+  <p>Longer training can over-optimize a reward. We ran a second PickScore run for 200 updates. The trained reward keeps rising, the held-out gains flatten, and HPSv3 peaks at update 60.</p>
+
+  <figure>
+    <img src="assets/overopt.png" width="1800" height="531" loading="lazy" alt="Five metrics against updates for a PickScore run trained for 200 updates, each shown relative to its change at update 100.">
+    <figcaption>A PickScore run trained past the budget. Each panel shows the change from the base relative to the change at update 100 (dotted line).</figcaption>
+  </figure>
+
+  <p>Single-reward runs show the same thing inside the 100-update budget. All four finish above the base on every held-out evaluator, but three of them show a held-out decline before update 100, and the CLIPScore and ImageReward runs end with the lowest held-out PickScore, 22.27 and 22.33. Many MEND images are also more saturated than the base, which reflects a preference of the reward. A per-sample price controls how far a sample moves. It does not make a narrow reward a good one.</p>
+
+  <h2 id="references">References</h2>
+  <ol class="refs">
+    <li id="ref1">Y. Kirstain, A. Polyak, U. Singer et al., Pick-a-Pic: An Open Dataset of User Preferences for Text-to-Image Generation, 2023.</li>
+    <li id="ref2">J. Liu, G. Liu, J. Liang et al., Flow-GRPO: Training Flow Matching Models via Online RL, 2025.</li>
+    <li id="ref3">K. Zheng, H. Chen, H. Ye et al., DiffusionNFT: Online Diffusion Reinforcement with Forward Process, 2026.</li>
+    <li id="ref4">J. Xu, X. Liu, Y. Wu et al., ImageReward: Learning and Evaluating Human Preferences for Text-to-Image Generation, 2023.</li>
+    <li id="ref5">K. Clark, P. Vicol, K. Swersky, D. J. Fleet, Directly Fine-Tuning Diffusion Models on Differentiable Rewards, 2024.</li>
+    <li id="ref6">R. T. Rockafellar, Monotone Operators and the Proximal Point Algorithm, 1976.</li>
+    <li id="ref7">P. Esser, S. Kulal, A. Blattmann et al., Scaling Rectified Flow Transformers for High-Resolution Image Synthesis, 2024.</li>
+    <li id="ref8">W. Zhou, X. Zhu, L. Kong et al., On-Policy Self-Distillation in Diffusion Models, 2026.</li>
+  </ol>
+
+  <h2 id="citation">Citation</h2>
+  <div class="bibtex">
+    <button class="copy" type="button" data-target="bib">Copy</button>
+<pre id="bib">@article{saini2026mend,
+  title   = {MEND: RL for Flow Models via Proximal Velocity Matching},
+  author  = {Saini, Shreshth and Birkbeck, Neil and Wang, Yilin and
+             Adsumilli, Balu and Bovik, Alan C.},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+  </div>
+
+</div>
+</article>
+</main>
+
+<footer class="wrap">
+  <p>© 2026 Shreshth Saini · <a href="index.html">MEND project page</a> · <a href="mailto:saini.2@utexas.edu">saini.2@utexas.edu</a></p>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script>
+<script defer src="site.js"></script>
+</body>
+</html>

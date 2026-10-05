@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEND: RL for Flow Models via Proximal Velocity Matching</title>
+<meta name="description" content="MEND is a reinforcement learning method for flow models. A sample moves only when its capped reward gain pays for the distance it travels, and the model regresses onto the resulting velocity targets.">
+<meta name="author" content="Shreshth Saini, Neil Birkbeck, Yilin Wang, Balu Adsumilli, Alan C. Bovik">
+<meta name="theme-color" content="#1e5aaa">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MEND: RL for Flow Models via Proximal Velocity Matching">
+<meta property="og:description" content="Reward post-training of flow models with a per-sample decision: a sample moves only when its capped reward gain pays for the distance it travels.">
+<meta property="og:url" content="https://shreshthsaini.github.io/MEND-RL/">
+<meta property="og:image" content="https://shreshthsaini.github.io/MEND-RL/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#abstract">Skip to content</a>
+
+<header class="hero wrap">
+  <h1><span class="name">MEND</span>: RL for Flow Models via Proximal Velocity Matching</h1>
+  <p class="authors">
+    <span>Shreshth Saini<sup>1,2</sup></span>
+    <span>Neil Birkbeck<sup>2</sup></span>
+    <span>Yilin Wang<sup>2</sup></span>
+    <span>Balu Adsumilli<sup>2</sup></span>
+    <span>Alan C. Bovik<sup>1,3</sup></span>
+  </p>
+  <p class="affil">
+    <span><sup>1</sup>The University of Texas at Austin</span>
+    <span><sup>2</sup>Google</span>
+    <span><sup>3</sup>University of Colorado Boulder</span>
+  </p>
+  <p class="venue">Preprint, 2026</p>
+  <ul class="buttons">
+    <li><a class="btn" href="paper/mend_arxiv.pdf">Paper</a></li>
+    <!-- arXiv button. To enable it: set href to the abs URL, delete the classes "is-disabled",
+         the aria-disabled and tabindex attributes, and change the label to "arXiv". -->
+    <li><a class="btn is-disabled" id="arxiv-link" aria-disabled="true" tabindex="-1">arXiv (soon)</a></li>
+    <li><a class="btn" href="https://github.com/shreshthsaini/MEND-RL">Code</a></li>
+    <li><a class="btn" href="blog.html">Blog</a></li>
+  </ul>
+</header>
+
+<main>
+
+<section class="teaser wrap" aria-label="Teaser">
+  <figure>
+    <img src="assets/teaser_pairs.jpg" width="1800" height="773" alt="Five prompts, each shown as an SD3.5-M image above and a MEND image below from the same initial noise, with PickScore on each tile. MEND scores higher on all five.">
+    <div class="panels">
+      <img src="assets/curve_train_reward.png" width="640" height="586" loading="lazy" alt="Training reward against updates for MEND, ReFL and DiffusionNFT under the equal-budget protocol. MEND is highest at every evaluated update.">
+      <img src="assets/curve_heldout_pick.png" width="640" height="586" loading="lazy" alt="Held-out PickScore against updates. MEND reaches 24.03 at update 100, above ReFL and DiffusionNFT, and passes the Flow-GRPO level before update 30.">
+      <img src="assets/curve_hps.png" width="640" height="586" loading="lazy" alt="Trained HPSv2.1 reward against updates for the MEND run trained on HPSv2.1, with ReFL and DiffusionNFT.">
+    </div>
+    <figcaption><strong>MEND stays ahead of ReFL and DiffusionNFT at every evaluated update.</strong> Top: SD3.5-M above, MEND below, same prompt and initial noise. Bottom, equal budget: (a) training reward and (b) held-out PickScore against ReFL and DiffusionNFT under the same protocol, with Flow-GRPO (about 4k updates) at its own setting as a level; (c) the HPSv2.1 run's trained reward.</figcaption>
+  </figure>
+</section>
+
+<section id="abstract" class="wrap">
+  <h2>Abstract</h2>
+  <div class="prose abstract">
+    <p>Reward post-training of flow models either reweights the model's own samples under a KL penalty or a frozen reference, often for thousands of updates, or backpropagates the reward and moves every sample without checking that the move is worth its size. We introduce MEND, a reinforcement learning method built on proximal velocity matching. MEND caps rewards within each prompt group, so samples that already score well receive no move. Below the cap, it proposes moves along the reward gradient and accepts one only when its capped reward gain exceeds a quadratic displacement price. The model then regresses onto the resulting velocity targets, with no KL term, frozen reference model, or advantage weights. In 100 updates, MEND outperforms Flow-GRPO (about 4k updates) on five of six evaluators at the same distance to base-model images. Under an equal-budget protocol, it surpasses ReFL and DiffusionNFT at every evaluated update across four training rewards, reaching PickScore 24.03 versus 23.92 and 23.43, respectively. A 300-update three-reward run also surpasses the five-reward DiffusionNFT model on all three rewards it trains on. MEND is general and easy to adopt: it applies to any flow backbone with a differentiable reward.</p>
+  </div>
+</section>
+
+<section id="motivation" class="wrap">
+  <h2>Motivation and background</h2>
+  <div class="prose">
+    <p>Learned reward models such as PickScore, HPSv2.1 and ImageReward score an image for human preference. Reward post-training uses such a score to update a pretrained text-to-image flow model. The open problem is how to turn a scalar score into an update that raises reward quickly without eroding what the base model already does well. A score alone does not say which samples should change or where they should go.</p>
+    <p>Existing methods fall into three families.</p>
+    <ul>
+      <li><strong>Policy gradient.</strong> Flow-GRPO reweights stochastic trajectories by group-relative advantages under a KL penalty.</li>
+      <li><strong>Weighted regression.</strong> DiffusionNFT reweights the model's own samples inside a regression loss.</li>
+      <li><strong>Reward backpropagation.</strong> ReFL and DRaFT differentiate the reward through sampling, which supplies a direction.</li>
+    </ul>
+    <p>The first two adjust how much existing samples count, and the Flow-GRPO and DiffusionNFT models we compare against use about 4k and 1.7k updates. Reward backpropagation moves every sample, including those that already score well, and nothing checks that a move earns its size. A KL penalty or reference term limits drift of the distribution as a whole. None of them decides, sample by sample, whether a change is worth making.</p>
+  </div>
+
+  <figure>
+    <img src="assets/toy.png" width="1800" height="792" loading="lazy" alt="A one-dimensional flow with three modes in four panels: the pre-trained flow, reward reweighting, a gradient target, and MEND. Reweighting loses the hard mode, the gradient target pushes samples off the data, and MEND keeps all three modes.">
+    <figcaption>(a) The base flow. (b) Reward reweighting concentrates on the peaks and loses the hard mode. (c) Gradient ascent moves every sample and pushes some of the mass off the data. (d) MEND: capped samples stay, certified moves are short, and the hard mode keeps its mass.</figcaption>
+  </figure>
+
+  <p class="tcap narrow"><strong>Objective components.</strong> The target check compares reward gain with displacement cost. MEND uses a lagged behavior adapter, not a frozen reference. Updates refer to the compared runs.</p>
+  <div class="tablewrap narrow">
+    <table>
+      <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL / frozen reference</th><th scope="col">Reward weights</th><th scope="col">Reward gradient</th><th scope="col">Target check</th><th scope="col">Updates</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Flow-GRPO</th><td class="no">yes</td><td class="no">yes</td><td class="no">no</td><td class="no">no</td><td>~4k</td></tr>
+        <tr><th scope="row">ReFL</th><td class="yes">no</td><td class="yes">no</td><td class="yes">yes</td><td class="no">no</td><td>100</td></tr>
+        <tr><th scope="row">DiffusionNFT</th><td class="no">yes</td><td class="no">yes</td><td class="no">no</td><td class="no">no</td><td>1.7k</td></tr>
+        <tr class="ours"><th scope="row">MEND</th><td class="yes">no</td><td class="yes">no</td><td class="yes">yes</td><td class="yes">yes</td><td>100</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="method" class="wrap">
+  <h2>Method</h2>
+  <div class="prose">
+    <p>MEND rests on one principle: a sample's target moves only when the reward it gains pays for the distance it travels. Each round applies this principle sample by sample to build targets, then fits them with a plain regression loss.</p>
+  </div>
+
+  <figure>
+    <img src="assets/method.png" width="1900" height="733" loading="lazy" alt="MEND overview in three panels. Panel 1: a group of rollouts for one prompt with a reward cap, the top sample kept. Panel 2: three proposals along the reward gradient for a sample below the cap, the shortest accepted and two rejected after the distance price. Panel 3: the trained adapter regresses onto the behavior prediction plus the accepted displacement.">
+    <figcaption>MEND overview. (1) A group for prompt \(c\); samples at or above the cap \(\kappa\) are kept. (2) Each sample below the cap gets 3 proposals along its reward gradient; the verdict subtracts a distance price from the capped reward and keeps the best candidate, here the shortest move \(y_1\). (3) The trained adapter regresses at the stored state onto the behavior prediction plus the accepted displacement \(d\); the behavior model then follows it by EMA.</figcaption>
+  </figure>
+
+  <div class="prose">
+    <p>Two adapters share the base model: the trained adapter \(\theta\) and a behavior adapter \(\theta_{\mathrm{old}}\). For each prompt \(c\), the behavior adapter generates a group of \(G\) deterministic 10-step rollouts with endpoints \(x^{(1)},\ldots,x^{(G)}\) and a stored intermediate state \(z_q\) near \(t_q = 0.278\). \(R(x,c)\) scores the decoded latent and \(g=\nabla_x R(x,c)\) is its gradient.</p>
+    <ol class="steps">
+      <li><strong class="step">Cap.</strong> Pushing samples that already score well buys little reward and costs diversity. Within each prompt group, rewards are capped at the quantile \(q = 0.75\), subject to a global floor \(\kappa_{\mathrm{glob}}\) that rises slowly across rounds. Samples at or above the cap receive zero displacement.
+        <div class="eq">\[ \kappa(c)=\max\Big\{Q_q\big(\{R(x^{(k)},c)\}_{k=1}^{G}\big),\;\kappa_{\mathrm{glob}}\Big\},\qquad R_\kappa(x,c)=\min\{R(x,c),\,\kappa(c)\} \]</div>
+      </li>
+      <li><strong class="step">Propose.</strong> Each sample below the cap receives \(K=3\) proposals along its normalized reward gradient. Each is decoded and scored once, so the decision rests on the reward attained at \(y_j\), not on a first-order prediction of it.
+        <div class="eq">\[ y_j = x + \eta_j\,\frac{g}{\lVert g\rVert},\qquad \eta_j\in\{0.1,\,0.2,\,0.4\} \]</div>
+      </li>
+      <li><strong class="step">Verify.</strong> A proposal must pay for its length. The verdict selects the candidate with the highest capped reward minus a quadratic displacement price, and the unchanged sample is always among the candidates.
+        <div class="eq">\[ y^{\star}=\arg\max_{y\in\{x,\,y_1,\ldots,y_K\}} J(y),\qquad J(y)=R_\kappa(y,c)-\frac{\lVert y-x\rVert^{2}}{2\tau} \]</div>
+        This is the proximal-point objective, maximized over a finite candidate set. The price \(\tau\) is fixed within a round and adjusted between rounds to target an acceptance rate of 30% to 60% among proposed samples.
+      </li>
+      <li><strong class="step">Regress.</strong> Let \(d=y^{\star}-x\) for accepted samples and \(d=0\) otherwise. At the stored state, the trained adapter matches the behavior prediction plus \(d\), with \(\lambda_{\mathrm{keep}}=10\).
+        <div class="eq">\[ \mathcal L(\theta)=\mathbb E_{\mathrm{moved}}\big\lVert \hat x_\theta(z_q)-\operatorname{sg}[\hat x_{\mathrm{old}}(z_q)+d]\big\rVert^{2}+\lambda_{\mathrm{keep}}\,\mathbb E_{\mathrm{kept}}\big\lVert \hat x_\theta(z_q)-\operatorname{sg}[\hat x_{\mathrm{old}}(z_q)]\big\rVert^{2} \]</div>
+        A kept sample asks for no change and a moved sample asks for exactly the correction \(d\).
+      </li>
+    </ol>
+    <p>Since \(\hat x_\theta(z_q)=z_q-t_q\,v_\theta(z_q,t_q,c)\), each term of the loss is a velocity-matching loss:</p>
+    <div class="eq">\[ \big\lVert \hat x_\theta(z_q)-\operatorname{sg}[\hat x_{\mathrm{old}}(z_q)+d]\big\rVert^{2}=t_q^{2}\,\big\lVert v_\theta(z_q,t_q,c)-v^{\star}\big\rVert^{2},\qquad v^{\star}=\operatorname{sg}\big[v_{\mathrm{old}}(z_q,t_q,c)-d/t_q\big] \]</div>
+    <p>Kept samples have \(v^{\star}=v_{\mathrm{old}}\). MEND is therefore velocity matching onto a target selected by the proximal rule, which is why we call it proximal velocity matching. The behavior adapter follows \(\theta\) by EMA, so the keep term anchors velocities to a lagged adapter that follows training, not to a frozen reference. Each round takes one AdamW step, and MEND never backpropagates through the sampler.</p>
+  </div>
+</section>
+
+<section id="theory" class="wrap">
+  <h2>Theory</h2>
+  <div class="prose">
+    <p><strong>Verified target selection.</strong> Every accepted target improves capped reward by more than its quadratic price, and its displacement bound shrinks to zero as the sample approaches the cap:</p>
+    <div class="eq">\[ \frac{\lVert y^{\star}-x\rVert^{2}}{2\tau}\;\le\;R_\kappa(y^{\star})-R_\kappa(x)\;\le\;\kappa-R_\kappa(x) \]</div>
+    <p><strong>First-order realization.</strong> At the behavior parameters, the descent direction of the regression loss backpropagates normalized reward gradients through the clean predictions of accepted samples only, scaled by their selected steps, so MEND keeps the direction of reward backpropagation and adds the two decisions it lacks: which samples move, and how far.</p>
+  </div>
+</section>
+
+<section id="results" class="wrap">
+  <h2>Results</h2>
+  <div class="prose">
+    <p><strong>What is compared.</strong> We train SD3.5-M on PickScore under the equal-budget protocol of Zhou et al. (2026): 48 Pick-a-Pic prompts × 24 images per update, rank-32 LoRA, 10-step rollouts at 512 pixels, and 100 updates. ReFL and DiffusionNFT are the baselines under this protocol. We also compare with the Flow-GRPO PickScore adapter (about 4k updates) and the five-reward DiffusionNFT model (1.7k updates). Evaluation uses DrawBench, 200 prompts × 5 seeds and 40 Euler steps, scored with six evaluators. Distance to base is the DreamSim distance to the base image generated with the same prompt, noise and sampling settings.</p>
+  </div>
+
+  <h3 class="prose">Main comparison</h3>
+  <p class="tcap">MEND outperforms Flow-GRPO on five of six evaluators at the same base distance. Its three-reward run surpasses DiffusionNFT on those three rewards. DrawBench 200 × 5. Bold: best; underline: second best.</p>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th scope="col">Method</th><th scope="col">Rewards</th><th scope="col">Updates</th><th scope="col">PickScore</th><th scope="col">HPSv2.1</th><th scope="col">HPSv3</th><th scope="col">ImageReward</th><th scope="col">CLIPScore</th><th scope="col">Aesthetic</th><th scope="col">Dist. to base ↓</th></tr>
+      </thead>
+      <tbody>
+        <tr class="base"><th scope="row">SD3.5-M</th><td>none</td><td>0</td><td>22.35</td><td>0.280</td><td>2.72</td><td>0.83</td><td>0.283</td><td>5.39</td><td>0</td></tr>
+        <tr><th scope="row">Flow-GRPO</th><td>PickScore</td><td>~4k</td><td>23.52</td><td>0.316</td><td>7.04</td><td>1.27</td><td>0.280</td><td>5.90</td><td class="best">0.313</td></tr>
+        <tr><th scope="row">DiffusionNFT</th><td>five</td><td>1.7k</td><td class="second">23.82</td><td class="second">0.331</td><td class="best">7.50</td><td class="best">1.49</td><td class="second">0.292</td><td class="best">6.02</td><td>0.538</td></tr>
+        <tr class="ours"><th scope="row">MEND (ours)</th><td>PickScore</td><td>100</td><td>23.70</td><td>0.319</td><td class="second">7.15</td><td class="second">1.32</td><td>0.291</td><td>5.88</td><td class="best">0.313</td></tr>
+        <tr class="ours"><th scope="row">MEND (ours)</th><td>three</td><td>300</td><td class="best">23.89</td><td class="best">0.344</td><td>5.87</td><td>1.28</td><td class="best">0.300</td><td class="second">5.92</td><td class="second">0.488</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <p>MEND outperforms Flow-GRPO on five of six evaluators at the same base distance (0.313), with roughly 40-fold fewer updates. Aesthetic score is the one evaluator on which Flow-GRPO is higher (5.90 versus 5.88). The run trained on PickScore, HPSv2.1 and CLIPScore surpasses DiffusionNFT (1.7k updates on five rewards) on those three evaluators at a smaller base distance. It is lower on HPSv3, ImageReward and aesthetic score, which it does not train on.</p>
+  </div>
+
+  <h3 class="prose">Equal budget, four training rewards</h3>
+  <p class="tcap narrow">Each MEND run uses SD3.5-M, 100 updates and the equal-budget protocol; the base uses the same evaluation setting. The last two columns give ReFL and DiffusionNFT under this protocol on the row's training reward. Bold: MEND's trained metric; underline: second best among the three methods on that metric.</p>
+  <div class="tablewrap narrow">
+    <table>
+      <thead>
+        <tr><th scope="col">Training reward</th><th scope="col">PickScore</th><th scope="col">HPSv2.1</th><th scope="col">ImageReward</th><th scope="col">CLIPScore</th><th scope="col">ReFL</th><th scope="col">DiffusionNFT</th></tr>
+      </thead>
+      <tbody>
+        <tr class="base"><th scope="row">none (SD3.5-M)</th><td>20.58</td><td>0.207</td><td>−0.52</td><td>0.239</td><td></td><td></td></tr>
+        <tr class="ours"><th scope="row">PickScore</th><td class="best">24.03</td><td>0.301</td><td>1.13</td><td>0.273</td><td class="second">23.92</td><td>23.43</td></tr>
+        <tr class="ours"><th scope="row">ImageReward</th><td>22.33</td><td>0.303</td><td class="best">1.51</td><td>0.266</td><td>1.28</td><td class="second">1.46</td></tr>
+        <tr class="ours"><th scope="row">HPSv2.1</th><td>23.06</td><td class="best">0.360</td><td>1.21</td><td>0.268</td><td class="second">0.358</td><td>0.336</td></tr>
+        <tr class="ours"><th scope="row">CLIPScore</th><td>22.27</td><td>0.268</td><td>0.98</td><td class="best">0.314</td><td class="second">0.308</td><td>0.298</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose">
+    <p>At equal budget, MEND is ahead of both baselines at every evaluated update. It reaches PickScore 24.03 at update 100, versus 23.92 for ReFL and 23.43 for DiffusionNFT. Separate runs trained on ImageReward, HPSv2.1 and CLIPScore are each above both baselines on their training reward at update 100 and at every evaluated update. All four runs finish above the base on every held-out evaluator.</p>
+  </div>
+
+  <figure class="narrow">
+    <img src="assets/rewards.png" width="1200" height="627" loading="lazy" alt="Trained reward against updates for MEND runs trained on CLIPScore and on ImageReward, with ReFL and DiffusionNFT under the same protocol. MEND is highest at every evaluated update in both panels.">
+    <figcaption>Trained reward against updates under the equal-budget protocol, one MEND run per reward, against ReFL and DiffusionNFT under the same protocol; markers give their 100-update values.</figcaption>
+  </figure>
+
+  <h3 class="prose">Update efficiency and fidelity</h3>
+  <div class="prose">
+    <p>On 64 unseen Pick-a-Pic prompts, MEND is above DiffusionNFT under the same protocol at every evaluated update. By update 25 it also surpasses the levels of Flow-GRPO and DiffusionNFT, which use about 4k and 1.7k updates. Reward keeps improving while base distance barely changes late in training: between updates 25 and 100, DrawBench PickScore rises from 23.36 to 23.70, while base distance moves only from 0.294 to 0.313. Training costs 10.0 GPU-hours on 3 GB200 GPUs, excluding evaluation.</p>
+  </div>
+  <figure>
+    <img src="assets/dynamics.png" width="1800" height="622" loading="lazy" alt="Three panels against updates: PickScore on unseen prompts for MEND and DiffusionNFT with Flow-GRPO and DiffusionNFT levels; percent change over SD3.5-M on ImageReward, HPSv2.1 and CLIPScore; and distance to base, which flattens near the Flow-GRPO level after about 30 updates.">
+    <figcaption>(a) PickScore on 64 held-out Pick-a-Pic prompts at the protocol's setting, against DiffusionNFT under the same protocol, with Flow-GRPO and DiffusionNFT (about 4k and 1.7k updates) as levels; (b) held-out evaluators and (c) distance to the base on DrawBench at guidance 4.5.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/progress.jpg" width="1800" height="845" loading="lazy" alt="Two prompts followed through training: SD3.5-M and MEND after 25, 50, 75 and 100 updates from the same initial noise, with PickScore on each tile.">
+    <figcaption>SD3.5-M and MEND after 25, 50, 75 and 100 updates, with the same initial noise along each row and PickScore on each tile. Top: the grasshopper appears by update 50 and the moustache by update 75. Bottom: the wifi symbol appears at update 50 and is sharp by update 75.</figcaption>
+  </figure>
+</section>
+
+<section id="qualitative" class="wrap">
+  <h2>Qualitative comparisons</h2>
+  <div class="prose">
+    <p>In matched comparisons, MEND corrects prompt errors of the base while keeping its composition. All grids use matched prompts and initial noise, with PickScore on each tile. Many MEND examples have higher saturation, which reflects a preference of the reward.</p>
+  </div>
+  <figure class="narrow">
+    <img src="assets/compare.jpg" width="1700" height="2047" loading="lazy" alt="Grid of matched prompts, one per row, with columns SD3.5-M, Flow-GRPO, DiffusionNFT and MEND, and PickScore on each tile.">
+    <figcaption>Rows share a prompt and seed across SD3.5-M, Flow-GRPO, DiffusionNFT, and MEND. PickScore on each tile.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/fidelity.jpg" width="1800" height="681" loading="lazy" alt="DrawBench prompts on counts, attributes and spatial relations, SD3.5-M above and MEND below from the same initial noise, with PickScore on each tile.">
+    <figcaption>DrawBench prompts (text under each column), SD3.5-M above and MEND below from the same initial noise, PickScore on each tile. MEND renders counts, attributes or spatial relations that SD3.5-M misses.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/pairs.jpg" width="1800" height="573" loading="lazy" alt="Additional matched pairs, SD3.5-M above and MEND below, with PickScore on each tile.">
+    <figcaption>More SD3.5-M and MEND results.</figcaption>
+  </figure>
+</section>
+
+<section id="generality" class="wrap">
+  <h2>Generality</h2>
+  <div class="prose">
+    <p>MEND is not tied to one backbone. It applies to any flow model with a differentiable reward, and it improves every backbone we test at the same update budget. On SD3-M, PickScore training raises PickScore from 20.36 to 23.70, above Linear-DPO at 20.96, and held-out HPSv2.1 from 0.215 to 0.298. On Z-Image-Turbo, a distilled model sampled in nine steps at 1024 pixels, PickScore training raises PickScore from 22.86 to 24.10 and held-out HPSv2.1 from 0.295 to 0.315. HPSv2.1 training reaches 0.357 with held-out PickScore 23.27.</p>
+  </div>
+  <div class="two-col narrow">
+    <p class="tcap"><strong>SD3-M.</strong> DrawBench 200 × 5, update 100.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Model</th><th scope="col">PickScore</th><th scope="col">HPSv2.1</th></tr></thead>
+        <tbody>
+          <tr class="base"><th scope="row">SD3-M</th><td>20.36</td><td>0.215</td></tr>
+          <tr><th scope="row">Linear-DPO</th><td>20.96</td><td>0.256</td></tr>
+          <tr class="ours"><th scope="row">MEND, PickScore</th><td class="best">23.70</td><td class="best">0.298</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tcap"><strong>Z-Image-Turbo.</strong> DrawBench 200 × 5, 1024 pixels, 9 steps.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Model</th><th scope="col">PickScore</th><th scope="col">HPSv2.1</th></tr></thead>
+        <tbody>
+          <tr class="base"><th scope="row">Z-Image-Turbo</th><td>22.86</td><td>0.295</td></tr>
+          <tr class="ours"><th scope="row">MEND, PickScore</th><td class="best">24.10</td><td>0.315</td></tr>
+          <tr class="ours"><th scope="row">MEND, HPSv2.1</th><td>23.27</td><td class="best">0.357</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="prose">
+    <p><strong>Limitations.</strong> MEND requires a differentiable reward. Its guarantees hold for the targets of each round. Longer training can over-optimize a reward, and some single-reward runs lose held-out score within the 100-update budget.</p>
+  </div>
+</section>
+
+<section id="bibtex" class="wrap">
+  <h2>BibTeX</h2>
+  <div class="bibtex narrow">
+    <button class="copy" type="button" data-target="bib">Copy</button>
+<pre id="bib">@article{saini2026mend,
+  title   = {MEND: RL for Flow Models via Proximal Velocity Matching},
+  author  = {Saini, Shreshth and Birkbeck, Neil and Wang, Yilin and
+             Adsumilli, Balu and Bovik, Alan C.},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <p>Contact: <a href="mailto:saini.2@utexas.edu">saini.2@utexas.edu</a></p>
+  <p>Page structure follows the <a href="https://nerfies.github.io">Nerfies</a> project page template and its descendants.</p>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script>
+<script defer src="site.js"></script>
+</body>
+</html>

@@ -1,0 +1,781 @@
+{
+ "_doc": "Design-space study / P6 ablation arms (paper appendix on the design space and the ablation table). Each arm = frozen best_mend.env reference (outputs/ds/launch_config.env) + regime (infra/mend_task_lib.sh P6_REGIME: PickScore, 16 prompts x 16 images per update, 50 updates, 1 GPU, MEND_SEED = seed or 1) + flags. est = GH200 GPU-h incl. probe and cheap eval. Outputs outputs/ds/<arm>/, outputs/eval/ds_<arm>.json. An arm whose resolved config equals the reference trains nothing (outputs/ds/aliases/<arm>.json). paper = row label in tab:ablation.",
+ "arms": [
+  {
+   "arm": "ref_seed1",
+   "axis": "ref",
+   "value": "seed1",
+   "label": "MEND (reference), seed 1",
+   "flags": [],
+   "est": 4.4,
+   "paper": "MEND (full)",
+   "seed": 1
+  },
+  {
+   "arm": "ref_seed2",
+   "axis": "ref",
+   "value": "seed2",
+   "label": "MEND (reference), seed 2",
+   "flags": [],
+   "est": 4.4,
+   "paper": null,
+   "seed": 2
+  },
+  {
+   "arm": "ref_seed3",
+   "axis": "ref",
+   "value": "seed3",
+   "label": "MEND (reference), seed 3",
+   "flags": [],
+   "est": 4.4,
+   "paper": null,
+   "seed": 3
+  },
+  {
+   "arm": "anchor_s0.465_eta0.5",
+   "axis": "anchor",
+   "value": "s0.465_eta0.5",
+   "label": "anchor s = 0.465 (k_s = 7), eta x0.5",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.465,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.05,0.1,0.2)",
+    "--config.mend.allow_late_anchor=1"
+   ],
+   "est": 4.2,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.465_eta1",
+   "axis": "anchor",
+   "value": "s0.465_eta1",
+   "label": "anchor s = 0.465 (k_s = 7), eta x1",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.465,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.1,0.2,0.4)",
+    "--config.mend.allow_late_anchor=1"
+   ],
+   "est": 4.2,
+   "paper": "anchor s"
+  },
+  {
+   "arm": "anchor_s0.465_eta2",
+   "axis": "anchor",
+   "value": "s0.465_eta2",
+   "label": "anchor s = 0.465 (k_s = 7), eta x2",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.465,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.2,0.4,0.8)",
+    "--config.mend.allow_late_anchor=1"
+   ],
+   "est": 4.2,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.602_eta0.5",
+   "axis": "anchor",
+   "value": "s0.602_eta0.5",
+   "label": "anchor s = 0.602 (k_s = 6), eta x0.5",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.602,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.05,0.1,0.2)"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.602_eta1",
+   "axis": "anchor",
+   "value": "s0.602_eta1",
+   "label": "anchor s = 0.602 (k_s = 6), eta x1",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.602,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.1,0.2,0.4)"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.602_eta2",
+   "axis": "anchor",
+   "value": "s0.602_eta2",
+   "label": "anchor s = 0.602 (k_s = 6), eta x2",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.602,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.2,0.4,0.8)"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.707_eta0.5",
+   "axis": "anchor",
+   "value": "s0.707_eta0.5",
+   "label": "anchor s = 0.707 (k_s = 5), eta x0.5",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.707,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.05,0.1,0.2)"
+   ],
+   "est": 4.6000000000000005,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.707_eta1",
+   "axis": "anchor",
+   "value": "s0.707_eta1",
+   "label": "anchor s = 0.707 (k_s = 5), eta x1",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.707,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.1,0.2,0.4)"
+   ],
+   "est": 4.6000000000000005,
+   "paper": "anchor s"
+  },
+  {
+   "arm": "anchor_s0.707_eta2",
+   "axis": "anchor",
+   "value": "s0.707_eta2",
+   "label": "anchor s = 0.707 (k_s = 5), eta x2",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.707,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.2,0.4,0.8)"
+   ],
+   "est": 4.6000000000000005,
+   "paper": null
+  },
+  {
+   "arm": "anchor_s0.858_eta1",
+   "axis": "anchor",
+   "value": "s0.858_eta1",
+   "label": "anchor s = 0.858 (k_s = 3), eta x1",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.anchor_sigmas=(0.858,)",
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.1,0.2,0.4)"
+   ],
+   "est": 4.9,
+   "paper": null
+  },
+  {
+   "arm": "K_1",
+   "axis": "K",
+   "value": "1",
+   "label": "K = 1",
+   "flags": [
+    "--config.mend.K=1",
+    "--config.mend.etas_anchored=(0.2,)",
+    "--config.mend.etas_explicit=(0.1,)"
+   ],
+   "est": 4.0,
+   "paper": "K = 1"
+  },
+  {
+   "arm": "K_2",
+   "axis": "K",
+   "value": "2",
+   "label": "K = 2",
+   "flags": [
+    "--config.mend.K=2",
+    "--config.mend.etas_anchored=(0.1,0.4)",
+    "--config.mend.etas_explicit=(0.05,0.2)"
+   ],
+   "est": 4.2,
+   "paper": null
+  },
+  {
+   "arm": "K_3",
+   "axis": "K",
+   "value": "3",
+   "label": "K = 3",
+   "flags": [
+    "--config.mend.K=3",
+    "--config.mend.etas_anchored=(0.1,0.2,0.4)",
+    "--config.mend.etas_explicit=(0.05,0.1,0.2)"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "K_4",
+   "axis": "K",
+   "value": "4",
+   "label": "K = 4",
+   "flags": [
+    "--config.mend.K=4",
+    "--config.mend.etas_anchored=(0.1,0.2,0.4,0.8)",
+    "--config.mend.etas_explicit=(0.05,0.1,0.2,0.4)"
+   ],
+   "est": 4.7,
+   "paper": null
+  },
+  {
+   "arm": "K_5",
+   "axis": "K",
+   "value": "5",
+   "label": "K = 5",
+   "flags": [
+    "--config.mend.K=5",
+    "--config.mend.etas_anchored=(0.05,0.1,0.2,0.4,0.8)",
+    "--config.mend.etas_explicit=(0.025,0.05,0.1,0.2,0.4)"
+   ],
+   "est": 5.0,
+   "paper": null
+  },
+  {
+   "arm": "tau_fixed0.01",
+   "axis": "tau",
+   "value": "fixed0.01",
+   "label": "fixed tau = 0.01 (no controller)",
+   "flags": [
+    "--config.mend.tau_init=0.01",
+    "--config.mend.tau_gamma=1.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "tau_fixed0.03",
+   "axis": "tau",
+   "value": "fixed0.03",
+   "label": "fixed tau = 0.03 (no controller)",
+   "flags": [
+    "--config.mend.tau_init=0.03",
+    "--config.mend.tau_gamma=1.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "tau_fixed0.1",
+   "axis": "tau",
+   "value": "fixed0.1",
+   "label": "fixed tau = 0.1 (no controller)",
+   "flags": [
+    "--config.mend.tau_init=0.1",
+    "--config.mend.tau_gamma=1.0"
+   ],
+   "est": 4.4,
+   "paper": "fixed tau (no controller)"
+  },
+  {
+   "arm": "tau_fixed0.3",
+   "axis": "tau",
+   "value": "fixed0.3",
+   "label": "fixed tau = 0.3 (no controller)",
+   "flags": [
+    "--config.mend.tau_init=0.3",
+    "--config.mend.tau_gamma=1.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "tau_fixed1",
+   "axis": "tau",
+   "value": "fixed1",
+   "label": "fixed tau = 1 (no controller)",
+   "flags": [
+    "--config.mend.tau_init=1",
+    "--config.mend.tau_gamma=1.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "tau_band0.1-0.3",
+   "axis": "tau",
+   "value": "band0.1-0.3",
+   "label": "tau controller, target acceptance 0.1-0.3",
+   "flags": [
+    "--config.mend.tau_lo=0.1",
+    "--config.mend.tau_hi=0.3",
+    "--config.mend.tau_gamma=1.5"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "tau_band0.3-0.6",
+   "axis": "tau",
+   "value": "band0.3-0.6",
+   "label": "tau controller, target acceptance 0.3-0.6",
+   "flags": [
+    "--config.mend.tau_lo=0.3",
+    "--config.mend.tau_hi=0.6",
+    "--config.mend.tau_gamma=1.5"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "tau_band0.6-0.9",
+   "axis": "tau",
+   "value": "band0.6-0.9",
+   "label": "tau controller, target acceptance 0.6-0.9",
+   "flags": [
+    "--config.mend.tau_lo=0.6",
+    "--config.mend.tau_hi=0.9",
+    "--config.mend.tau_gamma=1.5"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "cap_q0.5",
+   "axis": "cap",
+   "value": "q0.5",
+   "label": "group cap q = 0.5",
+   "flags": [
+    "--config.mend.cap=1",
+    "--config.mend.cap_mode=group",
+    "--config.mend.q=0.5"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "cap_q0.75",
+   "axis": "cap",
+   "value": "q0.75",
+   "label": "group cap q = 0.75",
+   "flags": [
+    "--config.mend.cap=1",
+    "--config.mend.cap_mode=group",
+    "--config.mend.q=0.75"
+   ],
+   "est": 4.4,
+   "paper": "q = 0.75"
+  },
+  {
+   "arm": "cap_q0.9",
+   "axis": "cap",
+   "value": "q0.9",
+   "label": "group cap q = 0.9",
+   "flags": [
+    "--config.mend.cap=1",
+    "--config.mend.cap_mode=group",
+    "--config.mend.q=0.9"
+   ],
+   "est": 4.6000000000000005,
+   "paper": null
+  },
+  {
+   "arm": "cap_none",
+   "axis": "cap",
+   "value": "none",
+   "label": "no cap",
+   "flags": [
+    "--config.mend.cap=0"
+   ],
+   "est": 4.800000000000001,
+   "paper": "no cap"
+  },
+  {
+   "arm": "cap_cluster",
+   "axis": "cap",
+   "value": "cluster",
+   "label": "cluster-relative cap",
+   "flags": [
+    "--config.mend.cap=1",
+    "--config.mend.cap_mode=cluster"
+   ],
+   "est": 4.5,
+   "paper": null
+  },
+  {
+   "arm": "cap_fixedfloor",
+   "axis": "cap",
+   "value": "fixedfloor",
+   "label": "global floor fixed after round 1 (no ratchet)",
+   "flags": [
+    "--config.mend.cap=1",
+    "--config.mend.kappa_glob_mode=fixed"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "keep_0",
+   "axis": "keep",
+   "value": "0",
+   "label": "lambda_keep = 0",
+   "flags": [
+    "--config.mend.lambda_keep=0.0"
+   ],
+   "est": 4.4,
+   "paper": "lambda_keep = 0"
+  },
+  {
+   "arm": "keep_1",
+   "axis": "keep",
+   "value": "1",
+   "label": "lambda_keep = 1",
+   "flags": [
+    "--config.mend.lambda_keep=1.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "keep_3",
+   "axis": "keep",
+   "value": "3",
+   "label": "lambda_keep = 3",
+   "flags": [
+    "--config.mend.lambda_keep=3.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "keep_10",
+   "axis": "keep",
+   "value": "10",
+   "label": "lambda_keep = 10",
+   "flags": [
+    "--config.mend.lambda_keep=10.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "keep_30",
+   "axis": "keep",
+   "value": "30",
+   "label": "lambda_keep = 30",
+   "flags": [
+    "--config.mend.lambda_keep=30.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "restart_o1raw",
+   "axis": "restart",
+   "value": "o1raw",
+   "label": "restart order 1, no correction (strict restart-baseline verdict)",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.restart_correction=none",
+    "--config.mend.restart_order=1"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "restart_o1delta",
+   "axis": "restart",
+   "value": "o1delta",
+   "label": "restart order 1, delta correction",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.restart_correction=delta",
+    "--config.mend.restart_order=1"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "restart_o2raw",
+   "axis": "restart",
+   "value": "o2raw",
+   "label": "restart order 2, no correction (strict restart-baseline verdict)",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.restart_correction=none",
+    "--config.mend.restart_order=2"
+   ],
+   "est": 4.5,
+   "paper": null
+  },
+  {
+   "arm": "restart_o2delta",
+   "axis": "restart",
+   "value": "o2delta",
+   "label": "restart order 2, delta correction",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.restart_correction=delta",
+    "--config.mend.restart_order=2"
+   ],
+   "est": 4.5,
+   "paper": null
+  },
+  {
+   "arm": "hint_grad_anchored",
+   "axis": "hint",
+   "value": "grad_anchored",
+   "label": "hint grad, anchored proposals",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.hint=grad"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "hint_rand_anchored",
+   "axis": "hint",
+   "value": "rand_anchored",
+   "label": "hint rand, anchored proposals",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.hint=rand"
+   ],
+   "est": 4.2,
+   "paper": "random direction"
+  },
+  {
+   "arm": "hint_cfg_anchored",
+   "axis": "hint",
+   "value": "cfg_anchored",
+   "label": "hint cfg, anchored proposals",
+   "flags": [
+    "--config.mend.proposal=anchored",
+    "--config.mend.hint=cfg"
+   ],
+   "est": 4.5,
+   "paper": "guidance direction"
+  },
+  {
+   "arm": "hint_grad_explicit",
+   "axis": "hint",
+   "value": "grad_explicit",
+   "label": "hint grad, explicit proposals",
+   "flags": [
+    "--config.mend.proposal=explicit",
+    "--config.mend.hint=grad"
+   ],
+   "est": 3.5000000000000004,
+   "paper": "explicit x + delta (reduced)"
+  },
+  {
+   "arm": "hint_rand_explicit",
+   "axis": "hint",
+   "value": "rand_explicit",
+   "label": "hint rand, explicit proposals",
+   "flags": [
+    "--config.mend.proposal=explicit",
+    "--config.mend.hint=rand"
+   ],
+   "est": 3.3000000000000003,
+   "paper": null
+  },
+  {
+   "arm": "hint_cfg_explicit",
+   "axis": "hint",
+   "value": "cfg_explicit",
+   "label": "hint cfg, explicit proposals",
+   "flags": [
+    "--config.mend.proposal=explicit",
+    "--config.mend.hint=cfg"
+   ],
+   "est": 3.6000000000000005,
+   "paper": null
+  },
+  {
+   "arm": "verdict_proximal",
+   "axis": "verdict",
+   "value": "proximal",
+   "label": "proximal verdict",
+   "flags": [
+    "--config.mend.verdict=1",
+    "--config.mend.verdict_mode=proximal",
+    "--config.mend.null_repair=0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "verdict_fixedstep",
+   "axis": "verdict",
+   "value": "fixedstep",
+   "label": "fixed step, no keep option",
+   "flags": [
+    "--config.mend.verdict=0"
+   ],
+   "est": 4.4,
+   "paper": "fixed step, no keep option"
+  },
+  {
+   "arm": "verdict_bestof",
+   "axis": "verdict",
+   "value": "bestof",
+   "label": "best-of-(K+1) (tau = tau_max)",
+   "flags": [
+    "--config.mend.tau_init=10.0",
+    "--config.mend.tau_gamma=1.0"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "verdict_null",
+   "axis": "verdict",
+   "value": "null",
+   "label": "null repair (y* = x)",
+   "flags": [
+    "--config.mend.null_repair=1"
+   ],
+   "est": 4.4,
+   "paper": "null repair"
+  },
+  {
+   "arm": "verdict_pareto",
+   "axis": "verdict",
+   "value": "pareto",
+   "label": "Pareto verdict, guards HPSv2.1 + CLIPScore (these two are then constrained, not held out)",
+   "flags": [
+    "--config.mend.verdict_mode=pareto",
+    "--config.mend.pareto_rewards=('hpsv2','clipscore')",
+    "--config.mend.pareto_eps=(0.0,)"
+   ],
+   "est": 4.800000000000001,
+   "paper": null
+  },
+  {
+   "arm": "states_random1",
+   "axis": "states",
+   "value": "random1",
+   "label": "1 unmoved state per seed in the band (x0 target)",
+   "flags": [
+    "--config.mend.target_mode=x0_multi",
+    "--config.mend.n_train_states=1"
+   ],
+   "est": 3.9000000000000004,
+   "paper": null
+  },
+  {
+   "arm": "states_random2",
+   "axis": "states",
+   "value": "random2",
+   "label": "2 unmoved states per seed in the band (x0 target, default)",
+   "flags": [
+    "--config.mend.target_mode=x0_multi",
+    "--config.mend.n_train_states=2"
+   ],
+   "est": 4.4,
+   "paper": null
+  },
+  {
+   "arm": "states_random4",
+   "axis": "states",
+   "value": "random4",
+   "label": "all 3 band states per seed (x0 target)",
+   "flags": [
+    "--config.mend.target_mode=x0_multi",
+    "--config.mend.n_train_states=3"
+   ],
+   "est": 5.7,
+   "paper": null
+  },
+  {
+   "arm": "states_all",
+   "axis": "states",
+   "value": "all",
+   "label": "4 unmoved states per seed over the full grid (x0 target, no band)",
+   "flags": [
+    "--config.mend.target_mode=x0_multi",
+    "--config.mend.n_train_states=4",
+    "--config.mend.x0_sigma_min=0.0",
+    "--config.mend.path_sigma_max=1.0"
+   ],
+   "est": 9.7,
+   "paper": null
+  },
+  {
+   "arm": "states_last",
+   "axis": "states",
+   "value": "last",
+   "label": "endpoint only (k = N - 1)",
+   "flags": [
+    "--config.mend.target_mode=path",
+    "--config.mend.train_states=last"
+   ],
+   "est": 3.9000000000000004,
+   "paper": "endpoint only (k = N - 1)"
+  },
+  {
+   "arm": "states_query",
+   "axis": "states",
+   "value": "query",
+   "label": "one-state path (query state moved)",
+   "flags": [
+    "--config.mend.target_mode=path",
+    "--config.mend.train_states=query"
+   ],
+   "est": 3.9000000000000004,
+   "paper": "one-state path (query state moved)"
+  },
+  {
+   "arm": "states_single",
+   "axis": "states",
+   "value": "single",
+   "label": "single-state clean-output target",
+   "flags": [
+    "--config.mend.target_mode=single_state_x0",
+    "--config.mend.train_states=random"
+   ],
+   "est": 3.9000000000000004,
+   "paper": "single-state clean-output target"
+  },
+  {
+   "arm": "mech_bestof_fm",
+   "axis": "mech",
+   "value": "bestof_fm",
+   "label": "search-then-distill: best-of-(K+1) (tau = tau_max) + flow matching on the winner with fresh noise (RAFT-style, no displaced path)",
+   "flags": [
+    "--config.mend.tau_init=10.0",
+    "--config.mend.tau_gamma=1.0",
+    "--config.mend.target_mode=fm_fresh",
+    "--config.mend.train_states=random"
+   ],
+   "est": 4.2,
+   "paper": null
+  },
+  {
+   "arm": "mech_reflow",
+   "axis": "mech",
+   "value": "reflow",
+   "label": "ReFlow target: straight line eps -> y* (same seed), MEND proposals and verdict",
+   "flags": [
+    "--config.mend.target_mode=reflow",
+    "--config.mend.train_states=random"
+   ],
+   "est": 4.2,
+   "paper": null
+  },
+  {
+   "arm": "mech_bestof_reflow",
+   "axis": "mech",
+   "value": "bestof_reflow",
+   "label": "best-of-(K+1) + ReFlow target (same seed)",
+   "flags": [
+    "--config.mend.tau_init=10.0",
+    "--config.mend.tau_gamma=1.0",
+    "--config.mend.target_mode=reflow",
+    "--config.mend.train_states=random"
+   ],
+   "est": 4.2,
+   "paper": null
+  }
+ ]
+}
