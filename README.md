@@ -1,6 +1,9 @@
 # MEND: RL for Flow Models via Proximal Velocity Matching
 
-[Project page](https://shreshthsaini.github.io/MEND-RL/) | [Paper (PDF)](docs/paper/mend_arxiv.pdf) | [Blog](https://shreshthsaini.github.io/MEND-RL/blog.html)
+[![arXiv](https://img.shields.io/badge/arXiv-2610.05954-B31B1B?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2610.05954)
+[![Project page](https://img.shields.io/badge/Project-Page-52665A?style=flat-square&logo=googlechrome&logoColor=white)](https://shreshthsaini.github.io/MEND-RL/)
+[![Code](https://img.shields.io/badge/GitHub-Code-24292F?style=flat-square&logo=github&logoColor=white)](https://github.com/shreshthsaini/MEND-RL)
+[![Blog](https://img.shields.io/badge/Read-Blog-6B6259?style=flat-square)](https://shreshthsaini.github.io/MEND-RL/blog.html)
 
 [![tests](https://github.com/shreshthsaini/MEND-RL/actions/workflows/tests.yml/badge.svg)](https://github.com/shreshthsaini/MEND-RL/actions/workflows/tests.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
@@ -9,7 +12,7 @@ Shreshth Saini<sup>1,2</sup>, Neil Birkbeck<sup>2</sup>, Yilin Wang<sup>2</sup>,
 
 <sup>1</sup>The University of Texas at Austin, <sup>2</sup>Google, <sup>3</sup>University of Colorado Boulder
 
-arXiv preprint, 2026.
+[arXiv:2610.05954](https://arxiv.org/abs/2610.05954), 2026.
 
 MEND is a reinforcement learning method for reward post-training of flow-matching image models, built on proximal velocity matching. Within each prompt group it caps rewards at a quantile, so samples that already score well receive no move. Below the cap it proposes moves along the reward gradient and accepts one only when its capped reward gain exceeds a quadratic displacement price. The model then regresses onto the resulting velocity targets. There is no KL term, no frozen reference model in the loss, and no advantage weighting. This repository contains the training code for Stable Diffusion 3.5 Medium and Z-Image-Turbo, the evaluation suite, the baseline trainers used for comparison, and CPU tests.
 
@@ -157,12 +160,18 @@ docs/           project page (GitHub Pages)
 
 ## Citation
 
+If you use MEND, please cite the [arXiv paper](https://arxiv.org/abs/2610.05954).
+
 ```bibtex
-@article{saini2026mend,
-  title   = {{MEND}: {RL} for Flow Models via Proximal Velocity Matching},
-  author  = {Saini, Shreshth and Birkbeck, Neil and Wang, Yilin and Adsumilli, Balu and Bovik, Alan C.},
-  journal = {arXiv preprint},
-  year    = {2026}
+@misc{saini2026mend,
+  title         = {{MEND}: {RL} For Flow Models via Proximal Velocity Matching},
+  author        = {Saini, Shreshth and Birkbeck, Neil and Wang, Yilin and Adsumilli, Balu and Bovik, Alan C.},
+  year          = {2026},
+  eprint        = {2610.05954},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.2610.05954},
+  url           = {https://arxiv.org/abs/2610.05954}
 }
 ```
 

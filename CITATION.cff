@@ -24,7 +24,7 @@ url: "https://shreshthsaini.github.io/MEND-RL/"
 license: Apache-2.0
 preferred-citation:
   type: article
-  title: "MEND: RL for Flow Models via Proximal Velocity Matching"
+  title: "MEND: RL For Flow Models via Proximal Velocity Matching"
   authors:
     - family-names: Saini
       given-names: Shreshth
@@ -36,6 +36,7 @@ preferred-citation:
       given-names: Balu
     - family-names: Bovik
       given-names: Alan C.
-  journal: "arXiv preprint"
+  journal: "arXiv"
+  doi: "10.48550/arXiv.2610.05954"
   year: 2026
-  url: "https://shreshthsaini.github.io/MEND-RL/paper/mend_arxiv.pdf"
+  url: "https://arxiv.org/abs/2610.05954"

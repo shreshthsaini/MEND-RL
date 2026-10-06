@@ -60,7 +60,7 @@ dev = [
 [project.urls]
 Homepage = "https://shreshthsaini.github.io/MEND-RL/"
 Repository = "https://github.com/shreshthsaini/MEND-RL"
-Paper = "https://shreshthsaini.github.io/MEND-RL/paper/mend_arxiv.pdf"
+Paper = "https://arxiv.org/abs/2610.05954"
 
 [tool.setuptools.packages.find]
 include = ["mend", "mend.*", "baselines", "baselines.*"]
