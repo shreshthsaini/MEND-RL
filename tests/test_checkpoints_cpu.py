@@ -182,7 +182,7 @@ def test_unsafe_subfolder_fails_before_download(hub, subfolder):
 
 
 @pytest.mark.parametrize("option,expected", [("--help", "--local_files_only"),
-                                            ("--list", "No official MEND adapters are published yet.")])
+                                            ("--list", "shreshthsaini/MEND-SD3.5M-PickScore")])
 def test_download_cli_never_imports_model_runtime(monkeypatch, capsys, option, expected):
     original_import = builtins.__import__
     forbidden = []

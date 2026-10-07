@@ -1,0 +1,48 @@
+{
+  "training_updates": 100,
+  "guidance_scale": 4.5,
+  "base_model": "stabilityai/stable-diffusion-3.5-medium",
+  "num_steps": 40,
+  "resolution": 512,
+  "rank": 32,
+  "alpha": 64,
+  "tensor_count": 382,
+  "alias": "mend_pickscore",
+  "repo_id": "shreshthsaini/MEND-SD3.5M-PickScore",
+  "training_rewards": "PickScore",
+  "checkpoint_role": "evaluation EMA policy",
+  "paper": "https://arxiv.org/abs/2610.05954",
+  "original_files": {
+    "adapter_config.json": {
+      "bytes": 1335,
+      "sha256": "3ffc7026a28504dba1aa125e6fb71a97783947becda966dc8ef2965266ba793c"
+    },
+    "adapter_model.safetensors": {
+      "bytes": 75156544,
+      "sha256": "ef798a199eb13f456f67929385d5e259690a18e34a1762401c679e5ecad621f6"
+    }
+  },
+  "diffusers_conversion": {
+    "source_format": "PEFT",
+    "native_lora_alpha": 32,
+    "original_lora_alpha": 64,
+    "lora_B_multiplier": 2,
+    "description": "LoRA B multiplied by alpha/rank; effective adapter update preserved."
+  },
+  "diffusers_file": {
+    "filename": "pytorch_lora_weights.safetensors",
+    "bytes": 75154912,
+    "sha256": "de6a08e706aec2a5273f231c5639cff044ff47d959227433d2ced8f637be672e"
+  },
+  "validation": {
+    "original_sha256_verified": true,
+    "tensor_count": 382,
+    "lora_module_count": 191,
+    "base_architecture_shapes_verified": true,
+    "peft_loader_verified": true,
+    "diffusers_loader_verified": true,
+    "saved_tensors_equal": true,
+    "cpu_lora_forward_max_absolute_error": 0.0,
+    "fresh_full_image_generation": false
+  }
+}

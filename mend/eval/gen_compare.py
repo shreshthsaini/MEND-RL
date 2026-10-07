@@ -78,6 +78,8 @@ def builtin_methods() -> Dict[str, Dict[str, Any]]:
             continue
         if name.startswith("opsd_"):
             reg[name] = _entry(name, 1.0, "native")
+        elif name in es.CHECKPOINTS:
+            reg[name] = _entry(name, es.CHECKPOINTS[name]["guidance_scale"], "paper")
         elif name.startswith("flowgrpo_"):
             reg[name] = _entry(name, 4.5, "native")
             reg[f"{name}_cfg1"] = _entry(name, 1.0, "cfg-free")

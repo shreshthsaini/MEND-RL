@@ -61,7 +61,7 @@ import torch
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 from mend.paths import REPO_ROOT  # noqa: E402
-from mend.checkpoints import add_download_args, offline_requested, resolve_adapter  # noqa: E402
+from mend.checkpoints import CHECKPOINTS, add_download_args, offline_requested, resolve_adapter  # noqa: E402
 REPO_DIR = str(REPO_ROOT)
 # The login profile exports TRANSFORMERS_CACHE=$HF_HOME/transformers (a legacy cache without the VLM scorers).
 # transformers 4.51 honours it over HF_HOME, so drop it: every model we need is in $HF_HOME/hub.
@@ -98,6 +98,7 @@ _OPSD = os.environ.get("OPSD_CKPT_ROOT", "checkpoints/opsd_released")
 # Named released checkpoints (``--lora <name>``). HF ids resolve through the local HF cache.
 KNOWN_LORAS = {
     "base": "",
+    **{name: name for name in CHECKPOINTS},
     "opsd_pickscore": f"{_OPSD}/sd35-m-pickscore",
     "opsd_hpsv2": f"{_OPSD}/sd35-m-hpsv2",
     "opsd_hpsv3": f"{_OPSD}/sd35-m-hpsv3",

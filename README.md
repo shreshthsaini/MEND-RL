@@ -4,6 +4,8 @@
 [![Project page](https://img.shields.io/badge/Project-Page-52665A?style=flat-square&logo=googlechrome&logoColor=white)](https://shreshthsaini.github.io/MEND-RL/)
 [![Code](https://img.shields.io/badge/GitHub-Code-24292F?style=flat-square&logo=github&logoColor=white)](https://github.com/shreshthsaini/MEND-RL)
 [![Blog](https://img.shields.io/badge/Read-Blog-6B6259?style=flat-square)](https://shreshthsaini.github.io/MEND-RL/blog.html)
+[![Hugging Face weights](https://img.shields.io/badge/Hugging_Face-Weights-FFD21E?style=flat-square&logo=huggingface&logoColor=black)](https://huggingface.co/collections/shreshthsaini/mend-rl-for-flow-models-via-proximal-velocity-matching-6ac5d201a2821178270f97ce)
+[![Hugging Face paper](https://img.shields.io/badge/Hugging_Face-Paper-FFD21E?style=flat-square)](https://huggingface.co/papers/2610.05954)
 
 [![tests](https://github.com/shreshthsaini/MEND-RL/actions/workflows/tests.yml/badge.svg)](https://github.com/shreshthsaini/MEND-RL/actions/workflows/tests.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
@@ -19,6 +21,17 @@ MEND is a reinforcement learning method for reward post-training of flow-matchin
 ![SD3.5-M samples (top) and MEND samples (bottom) for the same prompt and initial noise, with PickScore on each tile](docs/assets/teaser_pairs.jpg)
 
 SD3.5-M (top) and MEND after 100 updates (bottom), same prompt and initial noise. The number on each tile is its PickScore.
+
+## Released weights
+
+The official [Hugging Face collection](https://huggingface.co/collections/shreshthsaini/mend-rl-for-flow-models-via-proximal-velocity-matching-6ac5d201a2821178270f97ce) groups the adapters, [paper](https://huggingface.co/papers/2610.05954), and [project Space](https://huggingface.co/spaces/shreshthsaini/MEND-RL). Each model includes the original PEFT adapter, an equivalent Diffusers LoRA, checksums, sampling settings and citation.
+
+| Adapter | Download | Updates | Guidance |
+| --- | --- | ---: | ---: |
+| `mend_pickscore` | [MEND-SD3.5M-PickScore](https://huggingface.co/shreshthsaini/MEND-SD3.5M-PickScore) | 100 | 4.5 |
+| `mend_open3` | [MEND-SD3.5M-ThreeReward](https://huggingface.co/shreshthsaini/MEND-SD3.5M-ThreeReward) | 300 | 1.0 |
+
+Both use SD3.5 Medium at 512 pixels and 40 steps. `mend_open3` trains on PickScore, HPSv2.1 and CLIPScore. The aliases pin a Hub commit and check the original adapter's SHA256 hashes. The adapters are public; downloading the base model requires accepting its terms. Start generating with the commands below or use `pipe.load_lora_weights(...)` as shown in [INFERENCE.md](guides/INFERENCE.md#diffusers).
 
 ## Results
 
@@ -49,10 +62,10 @@ Included:
 - Baseline trainers for DiffusionOPSD, Flow-GRPO, DiffusionNFT and ReFL (`baselines/`).
 - Prompt lists and the recipe that rebuilds the Pick-a-Pic training prompts (`data/`).
 - CPU tests of the algorithm, trainers on tiny fake models, and the evaluation tools (`tests/`).
+- Official SD3.5-M PickScore and three-reward evaluation adapters on Hugging Face, in PEFT and Diffusers formats.
 
 Not included:
 
-- Trained MEND adapters. As of October 6, 2026, no official adapters are published on Hugging Face or as GitHub release assets. Use a local training checkpoint until a release is announced.
 - Datasets, base model weights and reward model weights. Scripts download the public ones; the base models may require accepting their terms on Hugging Face.
 - A packaged preset for the SD3-M runs in the paper. See [guides/TRAINING.md](guides/TRAINING.md#other-backbones).
 
@@ -86,7 +99,16 @@ python -m mend.rewards.check_setup --backbone sd35 --reward pickscore
 
 For generation, install the core package with `uv pip install -e .`; reward models and training data are unnecessary. Accept the [SD3.5 Medium terms](https://huggingface.co/stabilityai/stable-diffusion-3.5-medium) and run `hf auth login` before its first download.
 
-`scripts/generate.py --lora` accepts a local PEFT adapter or `namespace/repo/subfolder` on Hugging Face. It downloads the adapter and base model automatically, then loads the adapter into the evaluation pipeline. Start with `--batch_size 1`. See the [inference guide](guides/INFERENCE.md) for downloads, revision pinning, offline use, and the paper's sampling settings. `python scripts/download_weights.py --list` lists official adapter releases; the list is currently empty.
+Generate immediately with the released PickScore adapter:
+
+```bash
+python scripts/generate.py --lora mend_pickscore \
+  --prompt "a small blue book on a large red book" --seeds 0 \
+  --guidance_scale 4.5 --num_steps 40 --resolution 512 --batch_size 1 \
+  --out_dir outputs/samples/mend_pickscore
+```
+
+For the three-reward model, use `--lora mend_open3 --guidance_scale 1.0` and a separate output directory. Generation automatically downloads the adapter and base pipeline. `python scripts/download_weights.py --list` lists the pinned releases; `python scripts/download_weights.py mend_pickscore` downloads and validates the adapter without loading a model. Local PEFT adapters and `namespace/repo[/subfolder]` also work. See the [inference guide](guides/INFERENCE.md) for Diffusers, offline use and revision pinning.
 
 Check the target-selection math on CPU, with no model download:
 
@@ -181,7 +203,7 @@ If you use MEND, please cite the [arXiv paper](https://arxiv.org/abs/2610.05954)
 
 ## License
 
-The code is released under the [Apache License 2.0](LICENSE). [NOTICE](NOTICE) lists the files derived from other projects. Base models, reward models and datasets keep their own terms.
+The code is released under the [Apache License 2.0](LICENSE). [NOTICE](NOTICE) lists the files derived from other projects. Released SD3.5-M adapters use the Stability AI Community License, included with each model. Powered by Stability AI. Base models, reward models and datasets keep their own terms.
 
 ## Acknowledgements
 

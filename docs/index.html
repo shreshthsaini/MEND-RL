@@ -54,11 +54,26 @@
     <li><a class="btn" href="https://arxiv.org/pdf/2610.05954">Paper</a></li>
     <li><a class="btn" id="arxiv-link" href="https://arxiv.org/abs/2610.05954">arXiv</a></li>
     <li><a class="btn" href="https://github.com/shreshthsaini/MEND-RL">Code</a></li>
+    <li><a class="btn" href="https://huggingface.co/collections/shreshthsaini/mend-rl-for-flow-models-via-proximal-velocity-matching-6ac5d201a2821178270f97ce">Weights</a></li>
+    <li><a class="btn" href="https://huggingface.co/papers/2610.05954">HF paper</a></li>
     <li><a class="btn" href="blog.html">Blog</a></li>
   </ul>
 </header>
 
 <main>
+
+<section id="weights" class="wrap">
+  <h2>Download and use MEND</h2>
+  <div class="prose">
+    <p>The official SD3.5-M evaluation adapters are public on Hugging Face: <a href="https://huggingface.co/shreshthsaini/MEND-SD3.5M-PickScore">PickScore, 100 updates</a> and <a href="https://huggingface.co/shreshthsaini/MEND-SD3.5M-ThreeReward">PickScore + HPSv2.1 + CLIPScore, 300 updates</a>. Each includes original PEFT weights, a Diffusers LoRA, checksums, sampling settings and citation. The <a href="https://huggingface.co/collections/shreshthsaini/mend-rl-for-flow-models-via-proximal-velocity-matching-6ac5d201a2821178270f97ce">MEND collection</a> brings together the paper, models and project Space.</p>
+    <p>After <a href="https://github.com/shreshthsaini/MEND-RL#installation">installation</a> and accepting the SD3.5 Medium terms, generate with the released PickScore model:</p>
+    <pre><code>python scripts/generate.py --lora mend_pickscore \
+  --prompt "a small blue book on a large red book" --seeds 0 \
+  --guidance_scale 4.5 --num_steps 40 --resolution 512 --batch_size 1 \
+  --out_dir outputs/mend_pickscore</code></pre>
+    <p>For the three-reward model use <code>--lora mend_open3 --guidance_scale 1.0</code>. Downloads are automatic. For direct Diffusers loading and offline use, see the <a href="https://github.com/shreshthsaini/MEND-RL/blob/main/guides/INFERENCE.md">inference guide</a>. Powered by Stability AI. The adapters retain the Stability AI Community License; the code is Apache-2.0.</p>
+  </div>
+</section>
 
 <section class="teaser wrap" aria-label="Teaser">
   <figure>

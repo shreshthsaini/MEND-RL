@@ -7,7 +7,7 @@ Scope:
 - MEND rows are trained with [TRAINING.md](TRAINING.md) and scored with [EVALUATION.md](EVALUATION.md).
 - Flow-GRPO and DiffusionNFT rows in the main table are the adapters released by those projects, evaluated in this pipeline.
 - ReFL and DiffusionNFT numbers under the equal-budget protocol are the values reported by the DiffusionOPSD paper (Zhou et al., 2026) for that protocol. They are not reruns.
-- Each MEND configuration has one training seed. Trained MEND adapters are not distributed, and training was not rerun from this packaged tree.
+- Each MEND configuration has one training seed. The main-table SD3.5-M PickScore-100 and three-reward-300 evaluation adapters are [released on Hugging Face](INFERENCE.md). Training was not rerun from this packaged tree.
 
 All commands assume the setup of [INSTALL.md](INSTALL.md) and:
 
@@ -49,8 +49,8 @@ ev base_flowgrpo      ""                  flowgrpo ""
 ev base_opsd          ""                  opsd     ""
 ev flowgrpo_pickscore_F flowgrpo_pickscore flowgrpo pickscore
 ev nft_multireward_O  nft_multireward     opsd     "pickscore,hpsv2,clipscore"
-ev mend_pickscore_F   outputs/mend_pickscore/checkpoints/checkpoint-100/lora flowgrpo pickscore
-ev mend_open3_O       outputs/mend_open3/checkpoints/checkpoint-300/lora     opsd     "pickscore,clipscore,hpsv2"
+ev mend_pickscore_F   mend_pickscore     flowgrpo pickscore
+ev mend_open3_O       mend_open3         opsd     "pickscore,clipscore,hpsv2"
 ```
 
 Base distance, each run against the base run of its own protocol:

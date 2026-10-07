@@ -10,7 +10,28 @@ import os
 from pathlib import Path, PurePosixPath
 
 # Only published, verified releases belong here. Entries pin a Hub commit and hashes.
-CHECKPOINTS: dict[str, dict] = {}
+CHECKPOINTS: dict[str, dict] = {
+    "mend_pickscore": {
+        "repo_id": "shreshthsaini/MEND-SD3.5M-PickScore",
+        "revision": "e99538d7493f5b13df728e77f84a181a0d1845ec",
+        "subfolder": "", "family": "sd3", "guidance_scale": 4.5,
+        "num_steps": 40, "resolution": 512, "training_updates": 100,
+        "sha256": {
+            "adapter_config.json": "3ffc7026a28504dba1aa125e6fb71a97783947becda966dc8ef2965266ba793c",
+            "adapter_model.safetensors": "ef798a199eb13f456f67929385d5e259690a18e34a1762401c679e5ecad621f6",
+        },
+    },
+    "mend_open3": {
+        "repo_id": "shreshthsaini/MEND-SD3.5M-ThreeReward",
+        "revision": "6f2e86e6cff81b46810b3a175d504129de66db95",
+        "subfolder": "", "family": "sd3", "guidance_scale": 1.0,
+        "num_steps": 40, "resolution": 512, "training_updates": 300,
+        "sha256": {
+            "adapter_config.json": "cebfa81c4bd16c3c80eb5cee4a1b8e88c43c394d3310346367e59265120876a8",
+            "adapter_model.safetensors": "53703d117773cb3bcceaa4ce4c5aebd27cc2b66d6613ee14cc871f1709b7b28a",
+        },
+    },
+}
 ADAPTER_FILES = ("adapter_config.json", "adapter_model.safetensors", "adapter_model.bin")
 
 
