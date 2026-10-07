@@ -1,6 +1,6 @@
 # Inference
 
-Official evaluation adapters are available in the [MEND Hugging Face collection](https://huggingface.co/collections/shreshthsaini/mend-rl-for-flow-models-via-proximal-velocity-matching-6ac5d201a2821178270f97ce): [PickScore-100](https://huggingface.co/shreshthsaini/MEND-SD3.5M-PickScore) and [three-reward-300](https://huggingface.co/shreshthsaini/MEND-SD3.5M-ThreeReward). Each includes original PEFT weights and an equivalent Diffusers LoRA. `python scripts/download_weights.py --list` lists official aliases, pinned Hub revisions, hashes and sampling settings. Your own training checkpoints at `<OUTPUT_DIR>/checkpoints/checkpoint-<N>/lora` also work.
+Nine official evaluation adapters are available in the [MEND Hugging Face collection](https://huggingface.co/collections/shreshthsaini/mend-rl-for-flow-models-via-proximal-velocity-matching-6ac5d201a2821178270f97ce): five SD3.5-M adapters, two SD3-M seeds, and two Z-Image-Turbo adapters. The [README release table](../README.md#released-weights) lists every download and alias. Each includes original PEFT weights and an equivalent Diffusers LoRA. `python scripts/download_weights.py --list` lists official aliases, pinned Hub revisions, hashes, base models and sampling settings. Your own training checkpoints at `<OUTPUT_DIR>/checkpoints/checkpoint-<N>/lora` also work.
 
 For generation, install the core package with `uv pip install -e .`. You need the base model and one adapter. Reward models, reward downloads, and training prompts are unnecessary for `scripts/generate.py`.
 
@@ -35,7 +35,7 @@ python scripts/generate.py \
 | `--num_steps` | `40` | steps of the deterministic flow ODE sampler |
 | `--resolution` | `0` (512 from the config) | image size in pixels |
 | `--batch_size` | `1` | images per batch; increase only if GPU memory permits |
-| `--model` | `stabilityai/stable-diffusion-3.5-medium` | base pipeline path or id; also read from `MODEL_PATH` |
+| `--model` | matching base for an official SD3 alias, otherwise SD3.5-M | explicit base pipeline path or id; also read from `MODEL_PATH` |
 | `--mixed_precision` | `fp16` | `fp16`, `bf16` or `no` |
 
 Output:
@@ -59,6 +59,21 @@ Guidance: MEND adapters are trained without guidance. The paper's main table sam
 | MEND PickScore + HPSv2.1 + CLIPScore | 300 | 512 | 40 | 1.0 |
 
 Use `--lora mend_pickscore` for either PickScore setting and `--lora mend_open3` for the three-reward checkpoint. Set guidance explicitly: the generation CLI defaults to 1.0. The empty `--lora` default generates with the base model. Official aliases pin the original PEFT adapter revision and check its SHA256 hashes.
+
+The other SD3.5-M adapters use `mend_hpsv2`, `mend_clipscore` and `mend_imagereward`, with guidance 1.0, 512 pixels and 40 steps. Each is the paper's checkpoint-100, even when its training run continued beyond update 100.
+
+## SD3 Medium
+
+`mend_sd3m_pickscore_s1` and `mend_sd3m_pickscore_s2` are separate PickScore training seeds at update 100. The generation and comparison tools automatically select `stabilityai/stable-diffusion-3-medium-diffusers` for these aliases unless `--model` or `MODEL_PATH` supplies an override. Accept this base model's terms separately from SD3.5-M.
+
+```bash
+python scripts/generate.py --lora mend_sd3m_pickscore_s1 \
+  --prompt "a small blue book on a large red book" --seeds 0 \
+  --guidance_scale 1.0 --num_steps 40 --resolution 512 --batch_size 1 \
+  --out_dir outputs/samples/mend_sd3m_s1
+```
+
+These adapters use the Stability AI Non-Commercial Research Community License. SD3.5-M uses the Stability AI Community License. The specific license and notice are included in each Hub repository.
 
 ## Downloading an adapter
 
@@ -110,7 +125,7 @@ image.save("mend.png")
 
 For three-reward generation use `shreshthsaini/MEND-SD3.5M-ThreeReward`, revision `6f2e86e6cff81b46810b3a175d504129de66db95`, and `guidance_scale=1.0`. CPU offload trades speed for GPU memory. Diffusers and the paper's evaluation pipeline may produce different pixels even with the same integer seed; use the repository sampler for its evaluation protocol.
 
-The original PEFT adapter uses rank 32 and alpha 64. The Diffusers file doubles each LoRA B tensor and uses Diffusers' inferred alpha 32, preserving the same effective update. Each of the 191 adapter modules passed exact CPU forward equivalence and both formats passed loading against the full SD3.5-M architecture. Use one format at a time. The [release manifest](../release/huggingface/manifest.json) records pinned files and hashes. Powered by Stability AI; adapter licenses and notices are included in each model repository.
+All released PEFT adapters use rank 32 and alpha 64. Each Diffusers file doubles the LoRA B tensors and uses Diffusers' inferred alpha 32, preserving the effective update. Exact CPU forward equivalence passed for all 191 SD3 or 238 Z-Image adapter modules, and both formats passed loading against their complete base architectures. Use one format at a time. The [release manifest](../release/huggingface/manifest.json) records pinned files and hashes. Powered by Stability AI for the SD3 models; every adapter includes its own license and notice.
 
 ## Several methods side by side
 
@@ -124,13 +139,38 @@ python -m mend.eval.gen_compare \
 
 Images are written to `outputs/compare/<method>/<prompt_id>_<seed>.png`.
 
+For an SD3 Medium comparison with its base, pass `--model stabilityai/stable-diffusion-3-medium-diffusers` so every selected method uses that base. Z-Image adapters require the Z-Image pipeline and are excluded from this SD3 comparison registry.
+
 ## Z-Image-Turbo
 
-Z-Image-Turbo adapters are sampled with `mend.eval.native_eval`, which generates with the native nine-step sampler at 1024 px and then scores the images. `--model` accepts a local Diffusers directory or `Tongyi-MAI/Z-Image-Turbo`. `--lora` accepts a local directory or Hub repo/subfolder and uses the same download flags as the SD3.5 generator. This evaluation command also needs its selected reward models.
+The released Z-Image aliases are `mend_zimage_pickscore` and `mend_zimage_hpsv2`, both at update 100. They use `Tongyi-MAI/Z-Image-Turbo`, nine steps, 1024 pixels and guidance 0. Z-Image weights are Apache-2.0. Generate without reward models using Diffusers:
+
+```python
+import torch
+from diffusers import ZImagePipeline
+
+pipe = ZImagePipeline.from_pretrained("Tongyi-MAI/Z-Image-Turbo", torch_dtype=torch.bfloat16)
+pipe.load_lora_weights(
+    "shreshthsaini/MEND-Z-Image-Turbo-PickScore",
+    revision="ae66ee7bc2664d1836eb46c7f23b514fd27a317a",
+    weight_name="pytorch_lora_weights.safetensors",
+)
+pipe.enable_model_cpu_offload()
+image = pipe(
+    "a small blue book on a large red book", height=1024, width=1024,
+    num_inference_steps=9, guidance_scale=0.0,
+    generator=torch.Generator(device="cpu").manual_seed(0),
+).images[0]
+image.save("mend_zimage.png")
+```
+
+For HPSv2.1, use `shreshthsaini/MEND-Z-Image-Turbo-HPSv2.1` at revision `234ef5f0ee4ed97b021a167e5945cd8657289b7f`. Use BF16 for the Z-Image transformer; FP16 overflows in the study pipeline.
+
+For the paper's sampler and scoring, `mend.eval.native_eval` generates with the native nine-step sampler at 1024 px and then scores the images. `--model` accepts a local Diffusers directory or `Tongyi-MAI/Z-Image-Turbo`. `--lora` accepts an official alias, local directory or Hub repo/subfolder and uses the same download flags as the SD3.5 generator. This evaluation command also needs its selected reward models.
 
 ```bash
-python -m mend.eval.native_eval --pipeline zimage --model /path/to/Z-Image-Turbo \
-  --lora outputs/mend_zimage_pickscore/checkpoints/checkpoint-100/lora \
+python -m mend.eval.native_eval --pipeline zimage --model Tongyi-MAI/Z-Image-Turbo \
+  --lora mend_zimage_pickscore --batch_size 1 \
   --prompts data/drawbench/test.txt --n_prompts 20 \
   --images_dir outputs/samples/mend_zimage --out outputs/samples/mend_zimage/result.json
 ```

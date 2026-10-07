@@ -1,0 +1,95 @@
+{
+  "repo_id": "shreshthsaini/MEND-Z-Image-Turbo-HPSv2.1",
+  "updates": 100,
+  "base_repo": "Tongyi-MAI/Z-Image-Turbo",
+  "base_revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "base_license": "apache-2.0",
+  "base_license_source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+  "original_sha256": "9a9b1c61bce876248be5c03a310eab6f484c3455163d8feffc6555853dfb1613",
+  "adapter_config_sha256": "72042d0c06e04cbd18b475e3a21a0b3843df7618878a998a599c20e4a7067439",
+  "run_config_sha256": "1f8b23575e6e6d08d6c703720328613736b1db7c7a2e5962698da35b85c084e9",
+  "launch_config_sha256": "7b3176a233a745879e07a7a3c43e8b49d08b526834b1224ce598d87d8348678b",
+  "base_config_sha256": "06d49d1ae533f825c4704cc616fc8bc7826e9d449dde292cc7a95163c69af24a",
+  "native_sha256": "c0e0ba24dcb69ed4ca00df8ded2ac27eae5b32e568dbe6c9e27648d840d8293e",
+  "native_size_bytes": 317581856,
+  "original_size_bytes": 317583856,
+  "lora_module_count": 238,
+  "tensor_count": 476,
+  "r": 32,
+  "original_alpha": 64,
+  "native_alpha": 32,
+  "original_scaling": 2.0,
+  "native_scaling": 1.0,
+  "shape_validation": true,
+  "all_tensors_finite": true,
+  "all_cpu_adapter_forwards_bitwise_equal": true,
+  "max_abs_adapter_forward_error": 0.0,
+  "native_tensor_roundtrip_equality": true,
+  "peft_loader_meta_ok": true,
+  "direct_pipeline_native_loader_meta_ok": true,
+  "resolution": 1024,
+  "num_steps": 9,
+  "guidance_scale": 0.0,
+  "sampler": "euler",
+  "train_reward": "hpsv2",
+  "evaluation_sha256": "ae513da652df00eb32a779e4a5daa2badd3f7bba4f6bf54e9d2d09d117aab6c9",
+  "table_metrics": {
+    "aesthetic": 5.862506120681762,
+    "base_dist": 0.17204616644582502,
+    "clipscore": 0.2745485726520419,
+    "dreamsim_div": 0.12013501092111539,
+    "hpsv2": 0.3568074878305197,
+    "hpsv3": 9.53333207464218,
+    "imagereward": 1.2042793859115337,
+    "pickscore": 23.273098056077952,
+    "vendi": 1.5493542824709476
+  },
+  "n_prompts": 200,
+  "n_images": 1000,
+  "run_name": "zimg_mend_hpsv2_2026.09.24_23.37.52",
+  "current_run_git_commit": "d98e7e3",
+  "validation_stack": {
+    "torch": "2.11.0+cu128",
+    "diffusers": "0.39.0",
+    "peft": "0.21.0"
+  },
+  "validation_boundary": "Full transformer architecture on meta device; actual adapter CPU forwards. No base weights loaded and no GPU generation.",
+  "alias": "mend_zimage_hpsv2",
+  "family": "zimage",
+  "training_updates": 100,
+  "training_rewards": "HPSv2.1",
+  "base_model": "Tongyi-MAI/Z-Image-Turbo",
+  "original_files": {
+    "adapter_config.json": {
+      "sha256": "72042d0c06e04cbd18b475e3a21a0b3843df7618878a998a599c20e4a7067439",
+      "bytes": 1260
+    },
+    "adapter_model.safetensors": {
+      "sha256": "9a9b1c61bce876248be5c03a310eab6f484c3455163d8feffc6555853dfb1613",
+      "bytes": 317583856
+    }
+  },
+  "checkpoint_role": "evaluation EMA policy",
+  "paper": "https://arxiv.org/abs/2610.05954",
+  "diffusers_conversion": {
+    "lora_B_multiplier": 2,
+    "native_lora_alpha": 32,
+    "original_lora_alpha": 64
+  },
+  "diffusers_file": {
+    "filename": "pytorch_lora_weights.safetensors",
+    "bytes": 317581856,
+    "sha256": "c0e0ba24dcb69ed4ca00df8ded2ac27eae5b32e568dbe6c9e27648d840d8293e"
+  },
+  "validation": {
+    "original_sha256_verified": true,
+    "tensor_count": 476,
+    "lora_module_count": 238,
+    "base_architecture_shapes_verified": true,
+    "peft_loader_verified": true,
+    "diffusers_loader_verified": true,
+    "saved_tensors_equal": true,
+    "cpu_lora_forward_max_absolute_error": 0.0,
+    "fresh_full_image_generation": false
+  }
+}

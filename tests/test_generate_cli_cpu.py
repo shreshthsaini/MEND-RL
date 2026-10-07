@@ -2,7 +2,9 @@
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -74,3 +76,55 @@ def test_shared_resolver_accepts_zimage_for_hires(tmp_path):
     assert gen.suite.resolve_lora(str(adapter), expected_family="zimage") == str(adapter)
     with pytest.raises(ValueError, match="requires sd3"):
         gen.suite.resolve_lora(str(adapter))
+
+
+@pytest.mark.parametrize("alias,override,expected", [
+    ("mend_sd3m_pickscore_s1", "", "stabilityai/stable-diffusion-3-medium-diffusers"),
+    ("mend_sd3m_pickscore_s2", "", "stabilityai/stable-diffusion-3-medium-diffusers"),
+    ("mend_pickscore", "", "stabilityai/stable-diffusion-3.5-medium"),
+    ("mend_sd3m_pickscore_s1", "/custom/base", "/custom/base"),
+])
+def test_official_generation_pairs_adapter_with_base(tmp_path, monkeypatch, alias, override, expected):
+    config = SimpleNamespace(resolution=512, pretrained=SimpleNamespace(model="wrong-fallback-base"),
+                             sample=SimpleNamespace(noise_level=0.0))
+    monkeypatch.setitem(sys.modules, "mend.eval.cross_eval", SimpleNamespace(load_config=lambda *args: config))
+    monkeypatch.setattr(gen.suite, "resolve_lora", lambda *args, **kwargs: "/adapter")
+    captured = []
+
+    def generate(args, config, model, lora, protocol, resolution, noise, todo, save):
+        captured.append((model, lora))
+        for item in todo:
+            save(gen.suite._fake_image(item["seed"], item["pidx"], resolution), item)
+
+    monkeypatch.setattr(gen.suite, "_generate_sd3", generate)
+    out = tmp_path / "sample"
+    gen.main(["--prompt", "a book", "--lora", alias, "--model", override,
+              "--resolution", "8", "--out_dir", str(out)])
+    assert captured == [(expected, "/adapter")]
+    assert json.loads((out / "meta.json").read_text())["model"] == expected
+    from mend.eval import gen_compare
+
+    comparison = gen_compare.parse_method(alias + ":res=8", gen_compare.builtin_methods())
+    args = gen_compare.parse_args(["--model", override, "--out_root", str(tmp_path / "compare")])
+    gen_compare.run_method(args, comparison,
+                           [{"prompt_id": "p0", "source": "test", "tag": "", "prompt": "a book"}], [0])
+    assert captured == [(expected, "/adapter"), (expected, "/adapter")]
+    metadata = json.loads((tmp_path / "compare" / alias / "meta.json").read_text())
+    assert metadata["signature"]["model"] == expected
+
+
+def test_zimage_release_cannot_use_sd3_generator(tmp_path, monkeypatch):
+    config = SimpleNamespace(resolution=512, pretrained=SimpleNamespace(model="unused-base"),
+                             sample=SimpleNamespace(noise_level=0.0))
+    monkeypatch.setitem(sys.modules, "mend.eval.cross_eval", SimpleNamespace(load_config=lambda *args: config))
+
+    def forbidden_generation(*args):
+        pytest.fail("Z-Image adapter must be rejected before building an SD3 pipeline")
+
+    monkeypatch.setattr(gen.suite, "_generate_sd3", forbidden_generation)
+    with pytest.raises(ValueError, match="requires the zimage pipeline"):
+        gen.main(["--prompt", "a book", "--lora", "mend_zimage_pickscore", "--out_dir", str(tmp_path)])
+    from mend.eval import gen_compare
+
+    with pytest.raises(ValueError, match="unknown method"):
+        gen_compare.parse_method("mend_zimage_pickscore", gen_compare.builtin_methods())

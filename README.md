@@ -30,8 +30,15 @@ The official [Hugging Face collection](https://huggingface.co/collections/shresh
 | --- | --- | ---: | ---: |
 | `mend_pickscore` | [MEND-SD3.5M-PickScore](https://huggingface.co/shreshthsaini/MEND-SD3.5M-PickScore) | 100 | 4.5 |
 | `mend_open3` | [MEND-SD3.5M-ThreeReward](https://huggingface.co/shreshthsaini/MEND-SD3.5M-ThreeReward) | 300 | 1.0 |
+| `mend_hpsv2` | [MEND-SD3.5M-HPSv2.1](https://huggingface.co/shreshthsaini/MEND-SD3.5M-HPSv2.1) | 100 | 1.0 |
+| `mend_clipscore` | [MEND-SD3.5M-CLIPScore](https://huggingface.co/shreshthsaini/MEND-SD3.5M-CLIPScore) | 100 | 1.0 |
+| `mend_imagereward` | [MEND-SD3.5M-ImageReward](https://huggingface.co/shreshthsaini/MEND-SD3.5M-ImageReward) | 100 | 1.0 |
+| `mend_sd3m_pickscore_s1` | [MEND-SD3M-PickScore-Seed1](https://huggingface.co/shreshthsaini/MEND-SD3M-PickScore-Seed1) | 100 | 1.0 |
+| `mend_sd3m_pickscore_s2` | [MEND-SD3M-PickScore-Seed2](https://huggingface.co/shreshthsaini/MEND-SD3M-PickScore-Seed2) | 100 | 1.0 |
+| `mend_zimage_pickscore` | [MEND-Z-Image-Turbo-PickScore](https://huggingface.co/shreshthsaini/MEND-Z-Image-Turbo-PickScore) | 100 | 0.0 |
+| `mend_zimage_hpsv2` | [MEND-Z-Image-Turbo-HPSv2.1](https://huggingface.co/shreshthsaini/MEND-Z-Image-Turbo-HPSv2.1) | 100 | 0.0 |
 
-Both use SD3.5 Medium at 512 pixels and 40 steps. `mend_open3` trains on PickScore, HPSv2.1 and CLIPScore. The aliases pin a Hub commit and check the original adapter's SHA256 hashes. The adapters are public; downloading the base model requires accepting its terms. Start generating with the commands below or use `pipe.load_lora_weights(...)` as shown in [INFERENCE.md](guides/INFERENCE.md#diffusers).
+SD3.5-M and SD3-M adapters use 512 pixels and 40 steps. Z-Image-Turbo uses 1024 pixels, 9 steps and guidance 0. `mend_open3` trains on PickScore, HPSv2.1 and CLIPScore. The aliases pin a Hub commit and check the original adapter's SHA256 hashes. The adapters are public; gated base models require accepting their terms. Start generating with the commands below or use `pipe.load_lora_weights(...)` as shown in [INFERENCE.md](guides/INFERENCE.md#diffusers). The generator selects the matching base for SD3 aliases; Z-Image uses its own pipeline and [generation example](guides/INFERENCE.md#z-image-turbo).
 
 ## Results
 
@@ -51,7 +58,7 @@ Main comparison on DrawBench, 200 prompts x 5 seeds, 512 px, 40 Euler steps (Tab
 - MEND also improves SD3-M and the distilled Z-Image-Turbo at the same update budget.
 - The 100-update SD3.5-M run costs 10.0 GPU-hours on three GB200 GPUs, excluding evaluation.
 
-The rows use each model's own sampling setting: guidance 4.5 for SD3.5-M, Flow-GRPO and the PickScore MEND row, guidance 1 for DiffusionNFT and the three-reward MEND row. Flow-GRPO and DiffusionNFT rows are the authors' released adapters, evaluated in this repository's pipeline. Each MEND configuration has one training seed. The remaining tables and their protocols are in [guides/REPRODUCING.md](guides/REPRODUCING.md).
+The rows use each model's own sampling setting: guidance 4.5 for SD3.5-M, Flow-GRPO and the PickScore MEND row, guidance 1 for DiffusionNFT and the three-reward MEND row. Flow-GRPO and DiffusionNFT rows are the authors' released adapters, evaluated in this repository's pipeline. Each main-table MEND configuration has one training seed. The remaining tables and their protocols are in [guides/REPRODUCING.md](guides/REPRODUCING.md).
 
 ## What is included
 
@@ -62,7 +69,7 @@ Included:
 - Baseline trainers for DiffusionOPSD, Flow-GRPO, DiffusionNFT and ReFL (`baselines/`).
 - Prompt lists and the recipe that rebuilds the Pick-a-Pic training prompts (`data/`).
 - CPU tests of the algorithm, trainers on tiny fake models, and the evaluation tools (`tests/`).
-- Official SD3.5-M PickScore and three-reward evaluation adapters on Hugging Face, in PEFT and Diffusers formats.
+- Nine official evaluation adapters for SD3.5-M, SD3-M and Z-Image-Turbo on Hugging Face, in PEFT and Diffusers formats.
 
 Not included:
 
@@ -203,7 +210,7 @@ If you use MEND, please cite the [arXiv paper](https://arxiv.org/abs/2610.05954)
 
 ## License
 
-The code is released under the [Apache License 2.0](LICENSE). [NOTICE](NOTICE) lists the files derived from other projects. Released SD3.5-M adapters use the Stability AI Community License, included with each model. Powered by Stability AI. Base models, reward models and datasets keep their own terms.
+The code is released under the [Apache License 2.0](LICENSE). [NOTICE](NOTICE) lists the files derived from other projects. Released SD3.5-M adapters use the Stability AI Community License, SD3-M adapters use the Stability AI Non-Commercial Research Community License, and Z-Image-Turbo adapters use Apache-2.0. Each model includes its license and notice. Powered by Stability AI. Base models, reward models and datasets keep their own terms.
 
 ## Acknowledgements
 

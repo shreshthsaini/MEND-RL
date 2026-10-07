@@ -203,7 +203,7 @@ def run_method(args: argparse.Namespace, m: Dict[str, Any], prompts: List[Dict[s
         from mend.eval.cross_eval import load_config
 
         config = load_config(args.config_file, args.config)
-        model_path = args.model or config.pretrained.model
+        model_path = args.model or es.CHECKPOINTS.get(m["lora"], {}).get("base_model") or config.pretrained.model
     sig = signature(m, model_path, args.mixed_precision, args.fake)
     meta_path = os.path.join(mdir, "meta.json")
     if os.path.exists(meta_path):

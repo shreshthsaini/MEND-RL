@@ -7,7 +7,7 @@ Scope:
 - MEND rows are trained with [TRAINING.md](TRAINING.md) and scored with [EVALUATION.md](EVALUATION.md).
 - Flow-GRPO and DiffusionNFT rows in the main table are the adapters released by those projects, evaluated in this pipeline.
 - ReFL and DiffusionNFT numbers under the equal-budget protocol are the values reported by the DiffusionOPSD paper (Zhou et al., 2026) for that protocol. They are not reruns.
-- Each MEND configuration has one training seed. The main-table SD3.5-M PickScore-100 and three-reward-300 evaluation adapters are [released on Hugging Face](INFERENCE.md). Training was not rerun from this packaged tree.
+- The SD3.5-M and Z-Image configurations each have one training seed; both SD3-M PickScore seeds are released separately. All nine evaluation adapters are [released on Hugging Face](INFERENCE.md). Training was not rerun from this packaged tree.
 
 All commands assume the setup of [INSTALL.md](INSTALL.md) and:
 

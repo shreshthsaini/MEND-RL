@@ -15,7 +15,8 @@
         "adapter_config.json": "3ffc7026a28504dba1aa125e6fb71a97783947becda966dc8ef2965266ba793c",
         "adapter_model.safetensors": "ef798a199eb13f456f67929385d5e259690a18e34a1762401c679e5ecad621f6"
       },
-      "diffusers_sha256": "de6a08e706aec2a5273f231c5639cff044ff47d959227433d2ced8f637be672e"
+      "diffusers_sha256": "de6a08e706aec2a5273f231c5639cff044ff47d959227433d2ced8f637be672e",
+      "base_model": "stabilityai/stable-diffusion-3.5-medium"
     },
     "mend_open3": {
       "repo_id": "shreshthsaini/MEND-SD3.5M-ThreeReward",
@@ -30,16 +31,134 @@
         "adapter_config.json": "cebfa81c4bd16c3c80eb5cee4a1b8e88c43c394d3310346367e59265120876a8",
         "adapter_model.safetensors": "53703d117773cb3bcceaa4ce4c5aebd27cc2b66d6613ee14cc871f1709b7b28a"
       },
-      "diffusers_sha256": "93f2a2adb6b62aa691621afb71617cccadf5b7076073b45eea1b79c70efa4798"
+      "diffusers_sha256": "93f2a2adb6b62aa691621afb71617cccadf5b7076073b45eea1b79c70efa4798",
+      "base_model": "stabilityai/stable-diffusion-3.5-medium"
+    },
+    "mend_clipscore": {
+      "repo_id": "shreshthsaini/MEND-SD3.5M-CLIPScore",
+      "revision": "8cf35e7820f85ae548337c01390fa2181e88dbe0",
+      "subfolder": "",
+      "family": "sd3",
+      "base_model": "stabilityai/stable-diffusion-3.5-medium",
+      "guidance_scale": 1.0,
+      "num_steps": 40,
+      "resolution": 512,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "19a606e54149c3bf56fdc3949eade7bc19802ff163daa2cb8ad96395d0c5d4ee",
+        "adapter_model.safetensors": "a9d083cf8b3d2bdd90766a775acff7008f0e429d1d6a14d98beebc3380fb01f9"
+      },
+      "diffusers_sha256": "d6f4a72df6c2ab3c3c5bbc6d8abef8a2a4876c0e6026f0e098f723c1d7f2522d"
+    },
+    "mend_hpsv2": {
+      "repo_id": "shreshthsaini/MEND-SD3.5M-HPSv2.1",
+      "revision": "728c8f13acb06e9c9f46e6ac86615453ddab0f2f",
+      "subfolder": "",
+      "family": "sd3",
+      "base_model": "stabilityai/stable-diffusion-3.5-medium",
+      "guidance_scale": 1.0,
+      "num_steps": 40,
+      "resolution": 512,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "ef564f6447e2abc7f774f01a25aa9d042084f0e87ab7ec5e5b4187917bf74c61",
+        "adapter_model.safetensors": "d95728aa7960bec8a5c229d8a9a2c6585cb4178362b8a431317a4e17f85de1d1"
+      },
+      "diffusers_sha256": "8c59cb3035c4738a3ab4fd729a5e06fa3f08d6b5efb93b78c467d8213cb6dc08"
+    },
+    "mend_imagereward": {
+      "repo_id": "shreshthsaini/MEND-SD3.5M-ImageReward",
+      "revision": "c07523e8f019787b28e0d8b8cc982ecef5727da3",
+      "subfolder": "",
+      "family": "sd3",
+      "base_model": "stabilityai/stable-diffusion-3.5-medium",
+      "guidance_scale": 1.0,
+      "num_steps": 40,
+      "resolution": 512,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "1b71e04a70389de5b4b7e32f0c17431e6aeeb43d8e53d5fcdd0ffa9657d146da",
+        "adapter_model.safetensors": "04fff7027e63730acd0cf8943b4112da85fdbc81e62202977970116688f97429"
+      },
+      "diffusers_sha256": "03369cf68512eb6f8e949a36a799e981871dec1036678878fa49503907a13a42"
+    },
+    "mend_sd3m_pickscore_s1": {
+      "repo_id": "shreshthsaini/MEND-SD3M-PickScore-Seed1",
+      "revision": "53f01ae754784ad0987cc849ab8df1a4a315a23a",
+      "subfolder": "",
+      "family": "sd3",
+      "base_model": "stabilityai/stable-diffusion-3-medium-diffusers",
+      "guidance_scale": 1.0,
+      "num_steps": 40,
+      "resolution": 512,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "a1cd51a4194da4bcb64ed5e02021ed0bb65462561135371f21ddc4ad64b81300",
+        "adapter_model.safetensors": "a34e968004fdc86e08996520aa08fd0d51d8de0c679c3d9767af03004478252c"
+      },
+      "diffusers_sha256": "88be6d86b9c58ab966a6478676e6c4fde6ada908d238559355db11d4201569cc"
+    },
+    "mend_sd3m_pickscore_s2": {
+      "repo_id": "shreshthsaini/MEND-SD3M-PickScore-Seed2",
+      "revision": "d0b65c41edc72f21d79988b098dc3f753ead9818",
+      "subfolder": "",
+      "family": "sd3",
+      "base_model": "stabilityai/stable-diffusion-3-medium-diffusers",
+      "guidance_scale": 1.0,
+      "num_steps": 40,
+      "resolution": 512,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "af1229d13831b2295be667357ace394232286037adcf58f5d17d010fd91b0fef",
+        "adapter_model.safetensors": "666866120643e61a8dcb3cca59fa71f46cc146575849335531d49b4e7a59ef5a"
+      },
+      "diffusers_sha256": "53a2f0ae0dea103e13c3ed78852bc6fc3bcb5a542beaa62030fdb42d1191775f"
+    },
+    "mend_zimage_hpsv2": {
+      "repo_id": "shreshthsaini/MEND-Z-Image-Turbo-HPSv2.1",
+      "revision": "234ef5f0ee4ed97b021a167e5945cd8657289b7f",
+      "subfolder": "",
+      "family": "zimage",
+      "base_model": "Tongyi-MAI/Z-Image-Turbo",
+      "guidance_scale": 0.0,
+      "num_steps": 9,
+      "resolution": 1024,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "72042d0c06e04cbd18b475e3a21a0b3843df7618878a998a599c20e4a7067439",
+        "adapter_model.safetensors": "9a9b1c61bce876248be5c03a310eab6f484c3455163d8feffc6555853dfb1613"
+      },
+      "diffusers_sha256": "c0e0ba24dcb69ed4ca00df8ded2ac27eae5b32e568dbe6c9e27648d840d8293e"
+    },
+    "mend_zimage_pickscore": {
+      "repo_id": "shreshthsaini/MEND-Z-Image-Turbo-PickScore",
+      "revision": "ae66ee7bc2664d1836eb46c7f23b514fd27a317a",
+      "subfolder": "",
+      "family": "zimage",
+      "base_model": "Tongyi-MAI/Z-Image-Turbo",
+      "guidance_scale": 0.0,
+      "num_steps": 9,
+      "resolution": 1024,
+      "training_updates": 100,
+      "sha256": {
+        "adapter_config.json": "b9deaba48126bd17ae1b1176dbfb1b4adbc03260af8e426144eb12fabb336e47",
+        "adapter_model.safetensors": "09cdbbf51ff7340864a893c4b5b3bd7d7ca69749066bb5f77d75db4060feeed2"
+      },
+      "diffusers_sha256": "5d59ab7e7a32f3e117dd38479722ba94ceb671e5e39c2d6d12298b136fb11ca7"
     }
   },
   "space": {
     "repo_id": "shreshthsaini/MEND-RL",
-    "revision": "9b93eb79a35fa01980a63cc764d871aeb5321364",
+    "revision": "7cf79eb0c753ca3fdd2a9a1507d3f44e22027c70",
     "url": "https://huggingface.co/spaces/shreshthsaini/MEND-RL"
   },
   "paper": "https://arxiv.org/abs/2610.05954",
   "hf_paper": "https://huggingface.co/papers/2610.05954",
   "release_date": "2026-10-07",
-  "weight_license": "Stability AI Community License"
+  "weight_licenses": {
+    "sd35": "Stability AI Community License",
+    "sd3m": "Stability AI Non-Commercial Research Community License",
+    "zimage": "Apache-2.0"
+  },
+  "diffusion_research_collection": "https://huggingface.co/collections/shreshthsaini/diffusion-research-6a9e5fae53c81ffb7be668fa"
 }

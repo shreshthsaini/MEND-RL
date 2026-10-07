@@ -7,7 +7,7 @@ uv pip install -e ".[dev,analysis]"
 CUDA_VISIBLE_DEVICES='' python -m pytest -q
 ```
 
-The suite has 151 tests in `tests/test_*_cpu.py`. They load no model weights, download nothing and need no GPU. On one CPU core the run takes about two minutes. Set `OMP_NUM_THREADS=1` on shared machines.
+The CPU tests load no model weights, download nothing and need no GPU. They cover adapter downloads, base-model selection, pipeline-family checks, training and evaluation. On one CPU core the suite takes about two minutes. Set `OMP_NUM_THREADS=1` on shared machines.
 
 | Files | What they cover |
 | --- | --- |

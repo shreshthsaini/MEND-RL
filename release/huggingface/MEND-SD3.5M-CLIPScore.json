@@ -1,0 +1,100 @@
+{
+  "repo_id": "shreshthsaini/MEND-SD3.5M-CLIPScore",
+  "updates": 100,
+  "base_repo": "stabilityai/stable-diffusion-3.5-medium",
+  "base_revision": "b940f670f0eda2d07fbb75229e779da1ad11eb80",
+  "base_license": "stabilityai-ai-community",
+  "base_license_source": "https://huggingface.co/stabilityai/stable-diffusion-3.5-medium",
+  "original_sha256": "a9d083cf8b3d2bdd90766a775acff7008f0e429d1d6a14d98beebc3380fb01f9",
+  "adapter_config_sha256": "19a606e54149c3bf56fdc3949eade7bc19802ff163daa2cb8ad96395d0c5d4ee",
+  "run_config_sha256": "741c9b0cdccf29fd90875ecb86d5476b7b5dacac6435b8b772b41d4b76b547fc",
+  "launch_config_sha256": "04336d2fc59939d23a9cb52a7213fc8375393c1af09d0f024f02765d1011071e",
+  "base_config_sha256": "b6ea8128277df286573ce1937c36ce42a5a84e976331091ffccb1d05893dc299",
+  "native_sha256": "d6f4a72df6c2ab3c3c5bbc6d8abef8a2a4876c0e6026f0e098f723c1d7f2522d",
+  "native_size_bytes": 75155016,
+  "original_size_bytes": 75156544,
+  "lora_module_count": 191,
+  "tensor_count": 382,
+  "r": 32,
+  "original_alpha": 64,
+  "native_alpha": 32,
+  "original_scaling": 2.0,
+  "native_scaling": 1.0,
+  "shape_validation": true,
+  "all_tensors_finite": true,
+  "all_cpu_adapter_forwards_bitwise_equal": true,
+  "max_abs_adapter_forward_error": 0.0,
+  "native_tensor_roundtrip_equality": true,
+  "peft_loader_meta_ok": true,
+  "direct_pipeline_native_loader_meta_ok": true,
+  "resolution": 512,
+  "num_steps": 40,
+  "guidance_scale": 1.0,
+  "sampler": "flow",
+  "train_reward": "clipscore",
+  "evaluation_sha256": "b052448d1f26f1b8b0e67c1732ca25a09c52f15153100d6bce83528fce5d9209",
+  "table_metrics": {
+    "aesthetic": 5.223096212863921,
+    "base_dist": 0.4498317154881246,
+    "clipscore": 0.3143073667958379,
+    "dreamsim_div": 0.2871209511070364,
+    "hf_energy": 354.7801531744993,
+    "hf_frac": 0.04275846095277192,
+    "hf_log_ratio": -0.8629442817385118,
+    "hpsv2": 0.2681382237076759,
+    "hpsv3": 1.1493806163072586,
+    "imagereward": 0.9795459166353103,
+    "pickscore": 22.265770930528642,
+    "unifiedreward": 2.82592,
+    "vendi": 2.3190173179661238,
+    "hf_ratio": 0.42191800628024917
+  },
+  "n_prompts": 200,
+  "n_images": 1000,
+  "run_name": "final_clipscore_s1_2026.09.24_19.06.14",
+  "current_run_git_commit": "1144cde",
+  "validation_stack": {
+    "torch": "2.11.0+cu128",
+    "diffusers": "0.39.0",
+    "peft": "0.21.0"
+  },
+  "validation_boundary": "Full transformer architecture on meta device; actual adapter CPU forwards. No base weights loaded and no GPU generation.",
+  "alias": "mend_clipscore",
+  "family": "sd3",
+  "training_updates": 100,
+  "training_rewards": "CLIPScore",
+  "base_model": "stabilityai/stable-diffusion-3.5-medium",
+  "original_files": {
+    "adapter_config.json": {
+      "sha256": "19a606e54149c3bf56fdc3949eade7bc19802ff163daa2cb8ad96395d0c5d4ee",
+      "bytes": 1335
+    },
+    "adapter_model.safetensors": {
+      "sha256": "a9d083cf8b3d2bdd90766a775acff7008f0e429d1d6a14d98beebc3380fb01f9",
+      "bytes": 75156544
+    }
+  },
+  "checkpoint_role": "evaluation EMA policy",
+  "paper": "https://arxiv.org/abs/2610.05954",
+  "diffusers_conversion": {
+    "lora_B_multiplier": 2,
+    "native_lora_alpha": 32,
+    "original_lora_alpha": 64
+  },
+  "diffusers_file": {
+    "filename": "pytorch_lora_weights.safetensors",
+    "bytes": 75155016,
+    "sha256": "d6f4a72df6c2ab3c3c5bbc6d8abef8a2a4876c0e6026f0e098f723c1d7f2522d"
+  },
+  "validation": {
+    "original_sha256_verified": true,
+    "tensor_count": 382,
+    "lora_module_count": 191,
+    "base_architecture_shapes_verified": true,
+    "peft_loader_verified": true,
+    "diffusers_loader_verified": true,
+    "saved_tensors_equal": true,
+    "cpu_lora_forward_max_absolute_error": 0.0,
+    "fresh_full_image_generation": false
+  }
+}

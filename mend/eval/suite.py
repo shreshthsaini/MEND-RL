@@ -98,7 +98,7 @@ _OPSD = os.environ.get("OPSD_CKPT_ROOT", "checkpoints/opsd_released")
 # Named released checkpoints (``--lora <name>``). HF ids resolve through the local HF cache.
 KNOWN_LORAS = {
     "base": "",
-    **{name: name for name in CHECKPOINTS},
+    **{name: name for name, preset in CHECKPOINTS.items() if preset["family"] == "sd3"},
     "opsd_pickscore": f"{_OPSD}/sd35-m-pickscore",
     "opsd_hpsv2": f"{_OPSD}/sd35-m-hpsv2",
     "opsd_hpsv3": f"{_OPSD}/sd35-m-hpsv3",
@@ -287,7 +287,7 @@ def generate(args: argparse.Namespace) -> str:
 
         config = load_config(args.config_file, args.config)
         resolution = args.resolution or int(config.resolution)
-        model_path = args.model or config.pretrained.model
+        model_path = args.model or CHECKPOINTS.get(args.lora, {}).get("base_model") or config.pretrained.model
         noise_level = float(config.sample.noise_level)
 
     meta = {
