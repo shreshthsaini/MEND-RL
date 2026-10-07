@@ -52,7 +52,7 @@ Included:
 
 Not included:
 
-- Trained MEND adapters. Training reproduces them from the commands below.
+- Trained MEND adapters. As of October 6, 2026, no official adapters are published on Hugging Face or as GitHub release assets. Use a local training checkpoint until a release is announced.
 - Datasets, base model weights and reward model weights. Scripts download the public ones; the base models may require accepting their terms on Hugging Face.
 - A packaged preset for the SD3-M runs in the paper. See [guides/TRAINING.md](guides/TRAINING.md#other-backbones).
 
@@ -83,6 +83,10 @@ python -m mend.rewards.check_setup --backbone sd35 --reward pickscore
 [guides/INSTALL.md](guides/INSTALL.md) covers ImageReward, HPSv3, DreamSim, Z-Image-Turbo and the environment variables.
 
 ## Quick start
+
+For generation, install the core package with `uv pip install -e .`; reward models and training data are unnecessary. Accept the [SD3.5 Medium terms](https://huggingface.co/stabilityai/stable-diffusion-3.5-medium) and run `hf auth login` before its first download.
+
+`scripts/generate.py --lora` accepts a local PEFT adapter or `namespace/repo/subfolder` on Hugging Face. It downloads the adapter and base model automatically, then loads the adapter into the evaluation pipeline. Start with `--batch_size 1`. See the [inference guide](guides/INFERENCE.md) for downloads, revision pinning, offline use, and the paper's sampling settings. `python scripts/download_weights.py --list` lists official adapter releases; the list is currently empty.
 
 Check the target-selection math on CPU, with no model download:
 

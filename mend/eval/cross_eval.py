@@ -115,10 +115,13 @@ def compute_text_embeddings(
 
 
 def build_pipeline(
-    model_path: str, lora_path: str, device: torch.device, te_dtype: torch.dtype
+    model_path: str, lora_path: str, device: torch.device, te_dtype: torch.dtype,
+    *, cache_dir: str | None = None, local_files_only: bool = False,
 ) -> Tuple[StableDiffusion3Pipeline, List[Any], List[Any]]:
     """Mirror the pipeline build + LoRA load in train_nft_sd3.py main() (eval-relevant subset)."""
-    pipeline = StableDiffusion3Pipeline.from_pretrained(model_path)
+    pipeline = StableDiffusion3Pipeline.from_pretrained(
+        model_path, cache_dir=cache_dir, local_files_only=local_files_only,
+    )
     pipeline.vae.requires_grad_(False)
     pipeline.text_encoder.requires_grad_(False)
     pipeline.text_encoder_2.requires_grad_(False)

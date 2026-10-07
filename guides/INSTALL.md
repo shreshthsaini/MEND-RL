@@ -19,6 +19,8 @@ uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu
 uv pip install -e ".[rewards,dev]"
 ```
 
+For image generation only, use `uv pip install -e .`. Skip reward downloads and training-data preparation, then follow [INFERENCE.md](INFERENCE.md). Base model access is still required.
+
 Extras defined in `pyproject.toml`:
 
 | Extra | Adds | Needed for |

@@ -61,6 +61,7 @@ import torch
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 from mend.paths import REPO_ROOT  # noqa: E402
+from mend.checkpoints import add_download_args, offline_requested, resolve_adapter  # noqa: E402
 REPO_DIR = str(REPO_ROOT)
 # The login profile exports TRANSFORMERS_CACHE=$HF_HOME/transformers (a legacy cache without the VLM scorers).
 # transformers 4.51 honours it over HF_HOME, so drop it: every model we need is in $HF_HOME/hub.
@@ -122,6 +123,7 @@ def _common(p: argparse.ArgumentParser) -> None:
 
 def _gen_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--lora", default="", help="LoRA dir, HF repo id, or a name in KNOWN_LORAS; empty = base model.")
+    add_download_args(p)
     p.add_argument("--protocol", default="opsd", choices=sorted(PROTOCOLS))
     p.add_argument("--num_steps", type=int, default=-1, help="Override the protocol's step count.")
     p.add_argument("--guidance_scale", type=float, default=-1.0, help="Override the protocol's CFG scale.")
@@ -219,23 +221,12 @@ def initial_latent(seed: int, pidx: int, shape: Tuple[int, ...]) -> torch.Tensor
     return torch.randn(shape, generator=g, dtype=torch.float32)
 
 
-def resolve_lora(spec: str) -> str:
-    spec = KNOWN_LORAS.get(spec, spec)
-    if not spec or os.path.isdir(spec):
-        return spec
-    from huggingface_hub import snapshot_download
-
-    try:
-        return snapshot_download(spec, local_files_only=os.environ.get("HF_HUB_OFFLINE", "0") == "1")
-    except Exception:
-        # Some cached repos were copied in without refs/main; accept a unique snapshot holding an adapter.
-        hub = os.path.join(os.environ.get("HF_HOME", os.path.expanduser("~/.cache/huggingface")), "hub")
-        snaps = os.path.join(hub, "models--" + spec.replace("/", "--"), "snapshots")
-        cands = sorted(d for d in (os.listdir(snaps) if os.path.isdir(snaps) else [])
-                       if os.path.exists(os.path.join(snaps, d, "adapter_config.json")))
-        if len(cands) != 1:
-            raise
-        return os.path.join(snaps, cands[0])
+def resolve_lora(spec: str, *, expected_family: str = "sd3", **kwargs) -> str:
+    # OPSD aliases refer to local release directories, never Hub repositories.
+    mapped = KNOWN_LORAS.get(spec, spec)
+    if spec.startswith("opsd_") and spec in KNOWN_LORAS:
+        mapped = os.path.abspath(mapped)
+    return resolve_adapter(mapped, expected_family=expected_family, **kwargs)
 
 
 def atomic_json(obj: Any, path: str) -> None:
@@ -255,7 +246,10 @@ def read_manifest(rdir: str) -> List[Dict[str, Any]]:
 def gen_signature(meta: Dict[str, Any]) -> str:
     keys = ("lora_spec", "protocol", "num_steps", "guidance_scale", "sampler", "resolution", "prompts_sha1",
             "seeds", "model", "mixed_precision", "fake")
-    return json.dumps({k: meta.get(k) for k in keys}, sort_keys=True)
+    values = {k: meta.get(k) for k in keys}
+    # Older records predate explicit Hub revisions and subfolders.
+    values.update({k: meta.get(k) or "" for k in ("lora_revision", "lora_subfolder")})
+    return json.dumps(values, sort_keys=True)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -303,6 +297,8 @@ def generate(args: argparse.Namespace) -> str:
         "num_prompts": len(prompts), "seeds": seeds, "mixed_precision": args.mixed_precision,
         "seeding": "per-image CPU generator, SeedSequence([seed, pidx])",
         "fake": [args.fake_noise] if args.fake else False,
+        "lora_revision": getattr(args, "lora_revision", None),
+        "lora_subfolder": getattr(args, "lora_subfolder", ""),
     }
     meta_path = os.path.join(rdir, "meta.json")
     if os.path.exists(meta_path):
@@ -336,7 +332,10 @@ def generate(args: argparse.Namespace) -> str:
         for it in todo:
             save(_fake_image(it["seed"], it["pidx"], resolution, args.fake_noise), it)
     elif todo:
-        lora_path = resolve_lora(args.lora)
+        lora_path = resolve_lora(
+            args.lora, revision=args.lora_revision, subfolder=args.lora_subfolder,
+            cache_dir=args.cache_dir, local_files_only=args.local_files_only,
+        )
         meta["lora_path"] = lora_path
         _generate_sd3(args, config, model_path, lora_path, proto, resolution, noise_level, todo, save)
     meta["generate_seconds_last"] = round(time.time() - t0, 1)
@@ -359,7 +358,10 @@ def _generate_sd3(args, config, model_path, lora_path, proto, resolution, noise_
     device = torch.device(args.device)
     autocast_dtype = {"fp16": torch.float16, "bf16": torch.bfloat16, "no": None}[args.mixed_precision]
     te_dtype = autocast_dtype or torch.float32
-    pipeline, text_encoders, tokenizers = build_pipeline(model_path, lora_path, device, te_dtype)
+    pipeline, text_encoders, tokenizers = build_pipeline(
+        model_path, lora_path, device, te_dtype, cache_dir=getattr(args, "cache_dir", None),
+        local_files_only=offline_requested(getattr(args, "local_files_only", False)),
+    )
     c = int(pipeline.transformer.config.in_channels)
     f = int(pipeline.vae_scale_factor)
     shape = (c, resolution // f, resolution // f)

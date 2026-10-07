@@ -35,6 +35,7 @@ import torch
 
 # Reuse the exact scoring / IO path from the SD3 harness so numbers are comparable.
 from mend.eval import cross_eval
+from mend.checkpoints import add_download_args, offline_requested, resolve_adapter
 
 # Per-model official-default inference config. Resolution follows the DiffusionNFT
 # Table-1 annotation (SD-XL / SD3.5-L at 1024; FLUX at 512). steps/guidance are the
@@ -58,7 +59,8 @@ PIPELINE_SPECS = {
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Native-pipeline reference eval (SD-XL / SD3.5-L / FLUX / Z-Image-Turbo).")
     p.add_argument("--pipeline", required=True, choices=list(PIPELINE_SPECS), help="Which native pipeline to build.")
-    p.add_argument("--model", required=True, help="Local diffusers model dir (offline).")
+    p.add_argument("--model", required=True, help="Local Diffusers model directory or Hugging Face repo id.")
+    add_download_args(p)
     p.add_argument("--lora", default="",
                    help="Trained PEFT LoRA dir (…/checkpoints/checkpoint-N/lora); zimage ONLY. When set, "
                         "it is loaded onto the S3-DiT AFTER the base build (mirrors train_nft_zimage.py "
@@ -91,27 +93,31 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def build_pipeline(kind: str, model_path: str, dtype: torch.dtype, device: torch.device, lora_path: str = "") -> Any:
+def build_pipeline(kind: str, model_path: str, dtype: torch.dtype, device: torch.device, lora_path: str = "",
+                   *, cache_dir: str | None = None, local_files_only: bool = False) -> Any:
     """Load the stock diffusers pipeline (default scheduler) for the model family.
 
     If `lora_path` is set (zimage only), a trained PEFT LoRA is loaded onto the S3-DiT
     transformer after the base build, mirroring train_nft_zimage.py's warm-start so the row
     differs from the base row ONLY by the LoRA delta.
     """
+    download_kwargs = {"cache_dir": cache_dir, "local_files_only": offline_requested(local_files_only)}
     if kind == "sdxl":
         from diffusers import StableDiffusionXLPipeline
-        pipe = StableDiffusionXLPipeline.from_pretrained(model_path, torch_dtype=dtype, use_safetensors=True)
+        pipe = StableDiffusionXLPipeline.from_pretrained(
+            model_path, torch_dtype=dtype, use_safetensors=True, **download_kwargs,
+        )
     elif kind == "sd3":
         from diffusers import StableDiffusion3Pipeline
-        pipe = StableDiffusion3Pipeline.from_pretrained(model_path, torch_dtype=dtype)
+        pipe = StableDiffusion3Pipeline.from_pretrained(model_path, torch_dtype=dtype, **download_kwargs)
     elif kind == "flux":
         from diffusers import FluxPipeline
-        pipe = FluxPipeline.from_pretrained(model_path, torch_dtype=dtype)
+        pipe = FluxPipeline.from_pretrained(model_path, torch_dtype=dtype, **download_kwargs)
     elif kind == "zimage":
         # ZImagePipeline exists only in the ISO env (diffusers-from-source >=0.36). Load the 6B
         # S3-DiT + Qwen3 text encoder in bf16 (fp16 -> NaN); the FLUX VAE is upcast to fp32 below.
         from diffusers import ZImagePipeline
-        pipe = ZImagePipeline.from_pretrained(model_path, torch_dtype=dtype)
+        pipe = ZImagePipeline.from_pretrained(model_path, torch_dtype=dtype, **download_kwargs)
     else:
         raise ValueError(f"Unknown pipeline kind: {kind}")
     pipe = pipe.to(device)
@@ -219,11 +225,10 @@ def main() -> None:
         # base-model reference rows). Fail loud rather than silently ignoring the LoRA.
         if args.pipeline != "zimage":
             raise SystemExit(f"--lora is only supported for --pipeline zimage (got {args.pipeline}).")
-        # Mirror cross_eval.py's guard: the dir must be a saved PEFT adapter (…/checkpoint-N/lora).
-        if not os.path.exists(os.path.join(args.lora, "adapter_config.json")):
-            raise FileNotFoundError(
-                f"No adapter_config.json under --lora {args.lora}; expected a trained LoRA dir "
-                "(.../checkpoints/checkpoint-<step>/lora).")
+        args.lora = resolve_adapter(
+            args.lora, revision=args.lora_revision, subfolder=args.lora_subfolder,
+            cache_dir=args.cache_dir, local_files_only=args.local_files_only, expected_family="zimage",
+        )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     spec = PIPELINE_SPECS[args.pipeline]
     resolution = args.resolution if args.resolution > 0 else spec["resolution"]
@@ -245,7 +250,10 @@ def main() -> None:
         flush=True,
     )
 
-    pipe = build_pipeline(args.pipeline, args.model, dtype, device, lora_path=args.lora)
+    pipe = build_pipeline(
+        args.pipeline, args.model, dtype, device, lora_path=args.lora,
+        cache_dir=args.cache_dir, local_files_only=args.local_files_only,
+    )
     t_gen = time.time()
     images_cpu = generate(
         pipe, args.pipeline, prompts, resolution, num_steps, guidance, batch_size,

@@ -37,3 +37,40 @@ def test_fake_generation_layout_and_resume(tmp_path):
 def test_requires_a_prompt(tmp_path):
     with pytest.raises(SystemExit):
         gen.main(["--out_dir", str(tmp_path / "x"), "--fake"])
+
+
+def test_download_options_forwarded(tmp_path, monkeypatch):
+    captured = []
+    monkeypatch.setattr(gen.suite, "generate", lambda args: captured.append(args))
+    gen.main(["--prompt", "a book", "--out_dir", str(tmp_path / "x"), "--lora", "author/repo",
+              "--lora_revision", "abc123", "--lora_subfolder", "pickscore", "--cache_dir", str(tmp_path),
+              "--local_files_only"])
+    args = captured[0]
+    assert args.lora == "author/repo" and args.lora_revision == "abc123"
+    assert args.lora_subfolder == "pickscore" and args.cache_dir == str(tmp_path)
+    assert args.local_files_only and args.batch_size == 1
+
+
+def test_resume_rejects_different_adapter_revision(tmp_path):
+    argv = ["--prompt", "a book", "--out_dir", str(tmp_path / "run"), "--fake", "--lora", "author/repo"]
+    gen.main(argv + ["--lora_revision", "commit-a"])
+    with pytest.raises(RuntimeError, match="different generation config"):
+        gen.main(argv + ["--lora_revision", "commit-b"])
+
+
+def test_old_metadata_has_compatible_default_download_options():
+    before = {"lora_spec": "base", "fake": False}
+    after = dict(before, lora_revision=None, lora_subfolder="")
+    assert gen.suite.gen_signature(before) == gen.suite.gen_signature(after)
+
+
+def test_shared_resolver_accepts_zimage_for_hires(tmp_path):
+    adapter = tmp_path / "zimage"
+    adapter.mkdir()
+    (adapter / "adapter_config.json").write_text(json.dumps({
+        "peft_type": "LORA", "auto_mapping": {"base_model_class": "ZImageTransformer2DModel"},
+    }))
+    (adapter / "adapter_model.safetensors").write_bytes(b"mock weights")
+    assert gen.suite.resolve_lora(str(adapter), expected_family="zimage") == str(adapter)
+    with pytest.raises(ValueError, match="requires sd3"):
+        gen.suite.resolve_lora(str(adapter))

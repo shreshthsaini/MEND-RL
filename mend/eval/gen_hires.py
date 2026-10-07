@@ -223,7 +223,7 @@ def run_method(args, m: Dict[str, Any], prompts: List[Dict[str, str]], seeds: Li
     if todo:
         import torch
 
-        lora_path = es.resolve_lora(m["lora"])
+        lora_path = es.resolve_lora(m["lora"], expected_family=args.backbone)
         make = sd3_generator if args.backbone == "sd3" else zimage_generator
         gen, model_path = make(args, m, lora_path)
         sig["model"] = model_path

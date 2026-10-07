@@ -27,6 +27,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
+from mend.checkpoints import add_download_args  # noqa: E402
 from mend.eval import suite  # noqa: E402
 
 
@@ -36,13 +37,14 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--prompts", default="", help="Text file with one prompt per line (used with or without --prompt).")
     p.add_argument("--lora", default="", help="LoRA dir (.../checkpoints/checkpoint-N/lora), HF repo id, or a name "
                                               "in mend.eval.suite.KNOWN_LORAS; empty = base model.")
+    add_download_args(p)
     p.add_argument("--out_dir", required=True, help="Output directory.")
     p.add_argument("--seeds", default="0", help="Comma-separated seeds; one image per prompt per seed.")
     p.add_argument("--guidance_scale", type=float, default=1.0,
                    help="CFG scale. 1.0 = no guidance (the training setting); the paper's main table samples at 4.5.")
     p.add_argument("--num_steps", type=int, default=40, help="Sampler steps (deterministic flow ODE).")
     p.add_argument("--resolution", type=int, default=0, help="Image size in pixels (0 = the config's 512).")
-    p.add_argument("--batch_size", type=int, default=16)
+    p.add_argument("--batch_size", type=int, default=1, help="Images per batch; start at 1 to limit GPU memory.")
     p.add_argument("--model", default=os.environ.get("MODEL_PATH", ""),
                    help="Base pipeline path or HF id (default: stabilityai/stable-diffusion-3.5-medium from the config).")
     p.add_argument("--mixed_precision", default="fp16", choices=["fp16", "bf16", "no"])
@@ -82,6 +84,11 @@ def main(argv: Optional[Sequence[str]] = None) -> str:
     ]
     if args.device:
         suite_argv += ["--device", args.device]
+    for flag in ("lora_revision", "lora_subfolder", "cache_dir"):
+        if getattr(args, flag):
+            suite_argv += ["--" + flag, getattr(args, flag)]
+    if args.local_files_only:
+        suite_argv.append("--local_files_only")
     if args.fake:
         suite_argv.append("--fake")
     return suite.generate(suite.parse_args(suite_argv))
